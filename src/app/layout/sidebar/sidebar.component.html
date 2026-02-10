@@ -1,0 +1,33 @@
+<aside
+  class="bg-gray-800 text-white flex flex-col transition-all duration-300 shrink-0"
+  [class.w-64]="isOpen"
+  [class.w-0]="!isOpen"
+  [class.overflow-hidden]="!isOpen">
+
+  <!-- LOGO -->
+  <div class="flex items-center gap-3 px-5 py-5 border-b border-gray-700">
+    <span class="text-2xl">🏪</span>
+    <span class="font-bold text-lg whitespace-nowrap">Biosen100</span>
+  </div>
+
+  <!-- NAVIGATION -->
+  <nav class="flex-1 py-4 overflow-y-auto">
+    @for (item of navItems; track item.route) {
+
+      <a
+        [routerLink]="item.route"
+        routerLinkActive="bg-gray-700 border-l-4 border-blue-400"
+        class="flex items-center gap-3 px-5 py-3 text-sm text-gray-300
+               hover:bg-gray-700 hover:text-white transition-all whitespace-nowrap">
+        <span class="text-lg">{{ item.icon }}</span>
+        <span>{{ item.label }}</span>
+      </a>
+    }
+  </nav>
+
+  <!-- FOOTER SIDEBAR -->
+  <div class="px-5 py-4 border-t border-gray-700 text-xs text-gray-500 whitespace-nowrap">
+    Biosen100 © 2026
+  </div>
+
+</aside>

@@ -1,0 +1,208 @@
+<div class="h-screen w-screen flex overflow-hidden">
+
+  <!-- LEFT -->
+  <div class="w-full lg:w-1/2 flex flex-col bg-white">
+
+    <!-- LOGO — inchangé -->
+    <div class="h-64 flex items-center justify-center shrink-0 px-12">
+      <img src="logo.jpg" alt="Biosen100" class="h-full w-auto object-contain" />
+    </div>
+
+    <!-- SÉPARATEUR LÉGER -->
+    <div class="mx-12 h-px bg-gradient-to-r from-transparent via-gray-200 to-transparent shrink-0"></div>
+
+    <!-- CONTENU — remplit l'espace restant -->
+    <div class="flex-1 flex flex-col justify-between px-12 xl:px-20 py-8 overflow-y-auto">
+
+      <!-- HAUT : TITRE -->
+      <div>
+
+        <!-- TITRE ANIMÉ -->
+        <div class="flex items-center gap-4 mb-1">
+          <div class="shrink-0 w-12 h-12 bg-[#15803D]/10 rounded-2xl flex items-center justify-center">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+              <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                fill="#15803D" fill-opacity="0.15" stroke="#15803D" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <h2 class="text-2xl font-bold text-gray-900 tracking-tight">
+            <span id="animatedText"></span>
+          </h2>
+        </div>
+
+        <p class="text-gray-400 text-sm mb-8 pl-16">
+          Connectez-vous pour accéder à votre espace de gestion
+        </p>
+
+
+
+<!-- ❌ ERREUR -->
+@if (errorMessage) {
+  <div class="flex justify-center mb-6">
+    <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                rounded-lg bg-red-500 shadow-md shadow-red-500/25">
+
+      <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M18 6L6 18M6 6l12 12"
+            stroke="white" stroke-width="2.5"
+            stroke-linecap="round"/>
+        </svg>
+      </div>
+
+      <div class="flex items-center gap-2">
+        <span class="text-xs font-bold text-white">Erreur</span>
+        <span class="w-px h-3 bg-white/30"></span>
+        <span class="text-xs text-white/80">{{ errorMessage }}</span>
+      </div>
+
+    </div>
+  </div>
+}
+
+
+
+
+
+
+        <form [formGroup]="loginForm" (ngSubmit)="onSubmit()">
+
+          <!-- EMAIL -->
+          <div class="mb-5">
+            <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">
+              Adresse email
+            </label>
+            <div class="relative group">
+              <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none
+                          group-focus-within:text-[#15803D] transition-colors duration-200">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+                  <polyline points="22,6 12,13 2,6"/>
+                </svg>
+              </div>
+              <input
+                type="email"
+                formControlName="email"
+                placeholder="exemple@email.com"
+                class="w-full pl-14 pr-5 py-[22px] bg-gray-50 border-2 border-gray-100 rounded-2xl
+                       text-sm text-gray-800 placeholder-gray-400 transition-all duration-200"
+                [class.border-red-300]="email?.invalid && email?.touched"
+                [class.bg-red-50]="email?.invalid && email?.touched"
+              />
+            </div>
+            @if (email?.invalid && email?.touched) {
+              <p class="text-red-500 text-xs mt-2 flex items-center gap-1.5 pl-1">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Adresse email invalide
+              </p>
+            }
+          </div>
+
+          <!-- MOT DE PASSE -->
+          <div class="mb-5">
+            <label class="block text-xs font-bold text-gray-500 mb-2 uppercase tracking-widest">
+              Mot de passe
+            </label>
+            <div class="relative group">
+              <div class="absolute left-5 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none
+                          group-focus-within:text-[#15803D] transition-colors duration-200">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/>
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+                </svg>
+              </div>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                formControlName="password"
+                placeholder="••••••••••••"
+                class="w-full pl-14 pr-14 py-[22px] bg-gray-50 border-2 border-gray-100 rounded-2xl
+                       text-sm text-gray-800 placeholder-gray-400 transition-all duration-200"
+                [class.border-red-300]="password?.invalid && password?.touched"
+                [class.bg-red-50]="password?.invalid && password?.touched"
+              />
+              <button type="button" (click)="togglePassword()"
+                class="absolute right-5 top-1/2 -translate-y-1/2 text-gray-400
+                       hover:text-[#15803D] transition-colors duration-200">
+                @if (!showPassword) {
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/>
+                  </svg>
+                } @else {
+                  <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M8.56016 8.56201C8.18514 8.93716 7.97452 9.44592 7.97461 9.97637C7.9747 10.5068 8.18551 11.0155 8.56066 11.3905C8.93581 11.7655 9.44457 11.9762 9.97501 11.9761C10.5055 11.976 11.0141 11.7652 11.3892 11.39M14.6561 14.6481C13.2533 15.5258 11.6298 15.986 9.9751 15.9751C6.3751 15.9751 3.3751 13.9751 0.975098 9.97513C2.2471 7.85513 3.6871 6.29713 5.2951 5.30113M8.1551 4.15513C8.75414 4.03386 9.36391 3.97355 9.9751 3.97513C13.5751 3.97513 16.5751 5.97513 18.9751 9.97513C18.3091 11.0851 17.5961 12.0421 16.8371 12.8451M0.975098 0.975098L18.9751 18.9751"
+                      stroke="#ACB5BB" stroke-width="1.95" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                }
+              </button>
+            </div>
+            @if (password?.invalid && password?.touched) {
+              <p class="text-red-500 text-xs mt-2 flex items-center gap-1.5 pl-1">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10"/>
+                  <line x1="12" y1="8" x2="12" y2="12"/>
+                  <line x1="12" y1="16" x2="12.01" y2="16"/>
+                </svg>
+                Minimum 6 caractères
+              </p>
+            }
+          </div>
+
+          <!-- OPTIONS -->
+          <div class="flex items-center justify-between mb-7">
+            <label class="flex items-center gap-2.5 cursor-pointer select-none group">
+              <input type="checkbox" class="w-4 h-4 rounded accent-[#15803D]" />
+              <span class="text-xs text-gray-500 group-hover:text-gray-700 transition-colors">
+                Se souvenir de moi
+              </span>
+            </label>
+            <a routerLink="/forgot-password"
+              class="text-xs font-bold text-[#15803D] hover:text-[#166534] hover:underline transition-colors tracking-wide">
+              Mot de passe oublié ?
+            </a>
+          </div>
+
+          <!-- BOUTON -->
+          <button
+            type="submit"
+            [disabled]="loginForm.invalid || loading"
+            class="w-full bg-[#15803D] hover:bg-[#166534] active:scale-[0.99] text-white
+                   py-[22px] rounded-2xl font-bold text-sm tracking-widest uppercase transition-all
+                   disabled:opacity-50 disabled:cursor-not-allowed
+                   flex items-center justify-center gap-3
+                   shadow-lg shadow-[#15803D]/25 hover:shadow-xl hover:shadow-[#15803D]/30">
+            @if (loading) {
+              <span class="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
+              Connexion en cours...
+            } @else {
+              Se connecter
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            }
+          </button>
+
+        </form>
+
+      </div>
+
+      <!-- BAS : FOOTER -->
+      <div class="pt-6 border-t border-gray-100 mt-6">
+        <p class="text-xs text-gray-300 text-center">© 2026 Biosen100 · Tous droits réservés</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIGHT - IMAGE inchangé -->
+  <div class="hidden lg:block w-1/2 relative overflow-hidden">
+    <img src="imageLogin.png" alt="Biosen100" class="w-full h-full object-cover" />
+    <div class="absolute inset-0 flex flex-col justify-end p-12"></div>
+  </div>
+
+</div>

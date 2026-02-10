@@ -1,0 +1,108 @@
+<header class="bg-white shadow-sm px-6 py-3 flex items-center justify-between shrink-0">
+
+  <!-- TOGGLE SIDEBAR -->
+  <button (click)="toggleSidebar.emit()"
+    class="text-gray-500 hover:text-gray-800 text-xl transition-all">
+    ☰
+  </button>
+
+  <!-- DROITE -->
+  <div class="flex items-center gap-4">
+
+    <!-- 🏪 SÉLECTEUR BOUTIQUE (ADMIN SEULEMENT) -->
+    @if (authService.isAdmin()) {
+      <div class="flex items-center gap-2">
+        <select
+          (change)="onBoutiqueChange($event)"
+          class="text-sm border-2 border-gray-200 rounded-lg px-3 py-2 outline-none
+                 focus:border-gray-800 transition-all bg-white text-gray-700 cursor-pointer">
+          <option value="">🏪 Toutes les boutiques</option>
+          @for (boutique of boutiques; track boutique.id) {
+            <option [value]="boutique.id">{{ boutique.nom }}</option>
+          }
+        </select>
+
+        <!-- BADGE boutique sélectionnée -->
+        @if (selectedBoutique) {
+          <span class="text-xs bg-gray-800 text-white px-2.5 py-1 rounded-full font-semibold">
+            {{ selectedBoutique.nom }}
+          </span>
+        } @else {
+          <span class="text-xs bg-gray-100 text-gray-500 px-2.5 py-1 rounded-full">
+            Toutes
+          </span>
+        }
+      </div>
+    }
+
+    <!-- BADGE RÔLE -->
+    <span class="text-xs px-3 py-1 rounded-full font-semibold hidden sm:block"
+      [class]="authService.isAdmin()
+        ? 'bg-yellow-100 text-yellow-700'
+        : 'bg-blue-100 text-blue-700'">
+      {{ authService.isAdmin() ? '👑 Admin' : '🏪 Gérant' }}
+    </span>
+
+    <!-- BOUTIQUE GÉRANT -->
+    @if (!authService.isAdmin() && currentUser?.boutique) {
+      <span class="text-xs text-gray-500 hidden sm:block font-medium">
+        🏪 {{ currentUser?.boutique?.nom }}
+      </span>
+    }
+
+    <!-- AVATAR + DROPDOWN -->
+    <div class="relative">
+      <button
+        (click)="dropdownOpen = !dropdownOpen"
+        class="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-all">
+
+        @if (currentUser?.photo) {
+          <img [src]="currentUser?.photo" alt="photo"
+               class="w-8 h-8 rounded-full object-cover" />
+        } @else {
+          <div class="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center
+                      justify-center text-sm font-bold">
+            {{ getInitials() }}
+          </div>
+        }
+
+        <div class="text-left hidden sm:block">
+          <p class="text-sm font-semibold text-gray-800 leading-tight">{{ currentUser?.nom }}</p>
+          <p class="text-xs text-gray-400">{{ currentUser?.email }}</p>
+        </div>
+
+        <span class="text-gray-400 text-xs">▼</span>
+      </button>
+
+      <!-- DROPDOWN -->
+      @if (dropdownOpen) {
+        <div class="absolute right-0 top-12 bg-white rounded-xl shadow-xl border border-gray-100
+                    w-48 z-50 py-2 overflow-hidden">
+
+          <a routerLink="/profile" (click)="dropdownOpen = false"
+             class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700
+                    hover:bg-gray-50 transition-all">
+            👤 Mon profil
+          </a>
+
+          @if (authService.isAdmin()) {
+            <a routerLink="/users" (click)="dropdownOpen = false"
+               class="flex items-center gap-2 px-4 py-2 text-sm text-gray-700
+                      hover:bg-gray-50 transition-all">
+              👥 Utilisateurs
+            </a>
+          }
+
+          <hr class="my-1 border-gray-100" />
+
+          <button (click)="logout()"
+            class="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-500
+                   hover:bg-red-50 transition-all">
+            🚪 Déconnexion
+          </button>
+        </div>
+      }
+    </div>
+
+  </div>
+</header>

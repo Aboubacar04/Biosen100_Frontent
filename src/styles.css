@@ -1,1 +1,17 @@
-/* You can add global styles to this file, and also import other style files */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+* {
+  font-family: 'Geist Sans', 'Geist', sans-serif;
+}
+
+/* ✅ FIX FOCUS - SUPPRIME LE BLEU PARTOUT */
+input:focus,
+input:focus-visible,
+textarea:focus,
+select:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(21, 128, 61, 0.12) !important;
+  border-color: #15803D !important;
+}
