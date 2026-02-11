@@ -57,8 +57,9 @@
         class="flex items-center gap-2 hover:bg-gray-100 rounded-lg px-2 py-1.5 transition-all">
 
         @if (currentUser?.photo) {
-          <img [src]="currentUser?.photo" alt="photo"
-               class="w-8 h-8 rounded-full object-cover" />
+          <img [src]="'http://localhost:8000/storage/' + currentUser?.photo"
+     class="w-8 h-8 rounded-full object-cover" />
+
         } @else {
           <div class="w-8 h-8 rounded-full bg-gray-800 text-white flex items-center
                       justify-center text-sm font-bold">

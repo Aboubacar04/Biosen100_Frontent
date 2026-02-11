@@ -1,53 +1,574 @@
-<div>
-  <!-- BIENVENUE -->
-  <div class="bg-white rounded-xl shadow p-6 mb-6">
-    <h2 class="text-xl font-bold text-gray-800">
-      👋 Bienvenue, {{ currentUser?.nom }} !
-    </h2>
-    <p class="text-gray-500 text-sm mt-1">
-      @if (currentUser?.role === 'admin') {
-        Vous êtes connecté en tant qu'administrateur.
-      } @else {
-        Vous gérez la boutique <strong>{{ currentUser?.boutique?.nom }}</strong>
-      }
-    </p>
+<!-- ══ LOADING ══════════════════════════════════════════════════ -->
+<div *ngIf="loadingPriority" class="flex items-center justify-center h-64">
+  <div class="flex flex-col items-center gap-3">
+    <div class="w-10 h-10 border-4 border-[#15803D] border-t-transparent rounded-full animate-spin"></div>
+    <span class="text-sm text-gray-400">Chargement du dashboard...</span>
+  </div>
+</div>
+
+<!-- ══ DASHBOARD ════════════════════════════════════════════════ -->
+<div *ngIf="!loadingPriority" class="space-y-8">
+
+  <!-- ── EN-TÊTE ────────────────────────────────────────────── -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800 tracking-tight">Dashboard</h1>
+      <p class="text-xs text-gray-400 mt-0.5">Vue d'ensemble de votre activité</p>
+    </div>
+    <button (click)="loadPriority()"
+            class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-100
+                   rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50
+                   shadow-sm transition-colors">
+      <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581
+                 m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+      </svg>
+      Actualiser
+    </button>
   </div>
 
-  <!-- CARDS -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-6">
-    <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4">
-      <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-2xl">🛒</div>
-      <div>
-        <p class="text-sm text-gray-500">Commandes</p>
-        <p class="text-2xl font-bold text-gray-800">--</p>
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── SECTION AUJOURD'HUI ──────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div>
+    <!-- Label section -->
+    <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-[#15803D] animate-pulse"></div>
+        <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Aujourd'hui</span>
       </div>
+      <div class="flex-1 h-px bg-gray-100"></div>
     </div>
-    <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4">
-      <div class="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center text-2xl">📦</div>
-      <div>
-        <p class="text-sm text-gray-500">Produits</p>
-        <p class="text-2xl font-bold text-gray-800">--</p>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <!-- Ventes du jour -->
+      <div class="bg-[#15803D] rounded-2xl p-5 shadow-lg shadow-[#15803D]/25">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-widest text-white/70">Ventes</span>
+          <div class="w-8 h-8 bg-white/20 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-white tracking-tight">{{ formatMontant(stats.jour.ventes) }}</p>
+        <p class="text-xs text-white/60 mt-1.5">Chiffre d'affaires du jour</p>
       </div>
-    </div>
-    <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4">
-      <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center text-2xl">🧾</div>
-      <div>
-        <p class="text-sm text-gray-500">Factures</p>
-        <p class="text-2xl font-bold text-gray-800">--</p>
+
+      <!-- Commandes du jour -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Commandes</span>
+          <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184
+                       1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 tracking-tight">{{ stats.jour.nombre_commandes }}</p>
+        <p class="text-xs text-gray-400 mt-1.5">Commandes validées</p>
       </div>
-    </div>
-    <div class="bg-white rounded-xl shadow p-5 flex items-center gap-4">
-      <div class="w-12 h-12 bg-red-100 rounded-xl flex items-center justify-center text-2xl">💰</div>
-      <div>
-        <p class="text-sm text-gray-500">Ventes</p>
-        <p class="text-2xl font-bold text-gray-800">--</p>
+
+      <!-- Dépenses du jour -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Dépenses</span>
+          <div class="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 17H5m0 0V9m0 8l8-8 4 4 6-6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold text-gray-800 tracking-tight">{{ formatMontant(stats.jour.depenses) }}</p>
+        <p class="text-xs text-gray-400 mt-1.5">Dépenses du jour</p>
+      </div>
+
+      <!-- Bénéfice du jour -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-center justify-between mb-4">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Bénéfice</span>
+          <div class="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11
+                       0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9
+                       9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-2xl font-bold tracking-tight"
+           [ngClass]="stats.jour.benefice >= 0 ? 'text-emerald-600' : 'text-red-500'">
+          {{ formatMontant(stats.jour.benefice) }}
+        </p>
+        <p class="text-xs text-gray-400 mt-1.5">Marge nette du jour</p>
       </div>
     </div>
   </div>
 
-  <!-- PLACEHOLDER -->
-  <div class="bg-white rounded-xl shadow p-8 text-center text-gray-400">
-    <p class="text-4xl mb-3">🚧</p>
-    <p class="font-semibold text-gray-600">Tableau de bord en construction</p>
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── SECTION CE MOIS ───────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div>
+    <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+        <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Ce mois</span>
+      </div>
+      <div class="flex-1 h-px bg-gray-100"></div>
+    </div>
+
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+      <!-- Ventes mois -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 group hover:border-[#15803D]/30 transition-colors">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Ventes</span>
+          <div class="w-8 h-8 bg-[#15803D]/10 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xl font-bold text-gray-800 tracking-tight">{{ formatMontant(stats.mois.ventes) }}</p>
+        <div class="flex items-center gap-1.5 mt-2">
+          <span class="inline-flex items-center gap-1 px-2 py-0.5 bg-[#15803D]/10 text-[#15803D] rounded-md text-xs font-bold">
+            {{ stats.mois.nombre_commandes }} commandes
+          </span>
+        </div>
+      </div>
+
+      <!-- Commandes mois -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:border-blue-200 transition-colors">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Commandes</span>
+          <div class="w-8 h-8 bg-blue-50 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xl font-bold text-gray-800 tracking-tight">{{ stats.mois.nombre_commandes }}</p>
+        <p class="text-xs text-gray-400 mt-2">Validées ce mois</p>
+      </div>
+
+      <!-- Dépenses mois -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:border-red-200 transition-colors">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Dépenses</span>
+          <div class="w-8 h-8 bg-red-50 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 17H5m0 0V9m0 8l8-8 4 4 6-6"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xl font-bold text-gray-800 tracking-tight">{{ formatMontant(stats.mois.depenses) }}</p>
+        <p class="text-xs text-gray-400 mt-2">Total dépenses</p>
+      </div>
+
+      <!-- Bénéfice mois -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 hover:border-emerald-200 transition-colors">
+        <div class="flex items-center justify-between mb-3">
+          <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Bénéfice</span>
+          <div class="w-8 h-8 bg-emerald-50 rounded-xl flex items-center justify-center">
+            <svg class="w-4 h-4 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11
+                       0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9
+                       9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xl font-bold tracking-tight"
+           [ngClass]="stats.mois.benefice >= 0 ? 'text-emerald-600' : 'text-red-500'">
+          {{ formatMontant(stats.mois.benefice) }}
+        </p>
+        <p class="text-xs text-gray-400 mt-2">Marge nette</p>
+      </div>
+    </div>
   </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── SECTION CETTE ANNÉE ───────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div>
+    <div class="flex items-center gap-3 mb-4">
+      <div class="flex items-center gap-2">
+        <div class="w-2 h-2 rounded-full bg-purple-400"></div>
+        <span class="text-xs font-bold text-gray-500 uppercase tracking-widest">Cette année</span>
+      </div>
+      <div class="flex-1 h-px bg-gray-100"></div>
+    </div>
+
+    <div class="grid grid-cols-3 gap-4">
+
+      <!-- Ventes annuelles -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="w-12 h-12 bg-[#15803D]/10 rounded-2xl flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2
+                     2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2
+                     2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Ventes annuelles</p>
+          <p class="text-xl font-bold text-gray-800 truncate">{{ formatMontant(stats.annee.ventes) }}</p>
+        </div>
+      </div>
+
+      <!-- Dépenses annuelles -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="w-12 h-12 bg-red-50 rounded-2xl flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0
+                     002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Dépenses annuelles</p>
+          <p class="text-xl font-bold text-gray-800 truncate">{{ formatMontant(stats.annee.depenses) }}</p>
+        </div>
+      </div>
+
+      <!-- Bénéfice annuel -->
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
+        <div class="w-12 h-12 bg-purple-50 rounded-2xl flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11
+                     0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9
+                     9 0 11-18 0 9 9 0 0118 0z"/>
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <p class="text-xs text-gray-400 font-semibold uppercase tracking-widest mb-1">Bénéfice annuel</p>
+          <p class="text-xl font-bold truncate"
+             [ngClass]="stats.annee.benefice >= 0 ? 'text-emerald-600' : 'text-red-500'">
+            {{ formatMontant(stats.annee.benefice) }}
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── GRAPHIQUES ─────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+
+    <!-- Évolution ventes — LINE CHART -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-start justify-between mb-5">
+        <div>
+          <h3 class="text-sm font-bold text-gray-800">Évolution des ventes</h3>
+          <p class="text-xs text-gray-400 mt-0.5">7 derniers jours</p>
+        </div>
+        <!-- Mini stats -->
+        <div class="text-right">
+          <p class="text-xs text-gray-400">Total période</p>
+          <p class="text-sm font-bold text-gray-700">
+            {{ totalVentesEvolution }}
+          </p>
+        </div>
+      </div>
+      <!-- Canvas Chart.js -->
+      <div style="height: 200px; position: relative;">
+        <canvas #ventesChart></canvas>
+      </div>
+    </div>
+
+    <!-- Commandes semaine — BAR CHART -->
+    <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="flex items-start justify-between mb-5">
+        <div>
+          <h3 class="text-sm font-bold text-gray-800">Commandes par jour</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Cette semaine</p>
+        </div>
+        <!-- Mini stats -->
+        <div class="text-right">
+          <p class="text-xs text-gray-400">Total semaine</p>
+          <p class="text-sm font-bold text-[#15803D]">{{ totalCmdsSemaine }} commandes</p>
+        </div>
+      </div>
+      <!-- Canvas Chart.js -->
+      <div style="height: 200px; position: relative;">
+        <canvas #commandesChart></canvas>
+      </div>
+      <!-- Total ventes semaine -->
+      <div class="mt-3 pt-3 border-t border-gray-50 flex items-center justify-between">
+        <span class="text-xs text-gray-400">Ventes semaine</span>
+        <span class="text-xs font-bold text-gray-600">{{ totalVentesSemaine }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── FILTRES TOPS ───────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div class="bg-white rounded-2xl px-5 py-4 shadow-sm border border-gray-100
+              flex flex-wrap items-center gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">Période :</span>
+      <div class="flex gap-1.5">
+        <button *ngFor="let p of periodes; trackBy: trackByIndex"
+                (click)="periodeTop = p.value; loadTops()"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200"
+                [ngClass]="periodeTop === p.value
+                  ? 'bg-[#15803D] text-white border-[#15803D] shadow-sm'
+                  : 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100'">
+          {{ p.label }}
+        </button>
+      </div>
+    </div>
+    <div class="w-px h-6 bg-gray-100 shrink-0"></div>
+    <div class="flex items-center gap-2">
+      <span class="text-xs font-bold text-gray-400 uppercase tracking-widest shrink-0">Afficher :</span>
+      <div class="flex gap-1.5">
+        <button *ngFor="let l of limites; trackBy: trackByIndex"
+                (click)="limiteTop = l; loadTops()"
+                class="px-3 py-1.5 rounded-lg text-xs font-bold border transition-all duration-200"
+                [ngClass]="limiteTop === l
+                  ? 'bg-[#15803D] text-white border-[#15803D] shadow-sm'
+                  : 'bg-gray-50 text-gray-500 border-gray-100 hover:bg-gray-100'">
+          Top {{ l }}
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── SKELETON TOPS ──────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="loadingSecondary" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div *ngFor="let i of [1,2,3]; trackBy: trackByIndex"
+         class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+      <div class="h-4 w-32 bg-gray-100 rounded-lg animate-pulse mb-5"></div>
+      <div *ngFor="let j of [1,2,3,4,5]; trackBy: trackByIndex"
+           class="flex items-center gap-3 py-3 border-b border-gray-50">
+        <div class="w-9 h-9 bg-gray-100 rounded-xl animate-pulse shrink-0"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-3 bg-gray-100 rounded-lg animate-pulse"></div>
+          <div class="h-2 w-2/3 bg-gray-100 rounded-lg animate-pulse"></div>
+        </div>
+        <div class="w-16 h-6 bg-gray-100 rounded-lg animate-pulse shrink-0"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── TOPS ───────────────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loadingSecondary" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+
+    <!-- Top Produits -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-gray-800">🏆 Top Produits</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Par quantité vendue</p>
+        </div>
+        <span class="text-xs text-gray-400 font-medium">{{ periodeTop }}</span>
+      </div>
+      <div class="divide-y divide-gray-50">
+        <div *ngFor="let p of topProduits; let i = index; trackBy: trackById"
+             class="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+          <span class="text-base w-7 shrink-0 text-center">{{ medalEmoji(i) }}</span>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-700 truncate">{{ p.nom }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ formatMontant(p.total_ventes) }}</p>
+          </div>
+          <span class="shrink-0 px-2.5 py-1 bg-[#15803D]/10 text-[#15803D]
+                       rounded-lg text-xs font-bold whitespace-nowrap">
+            {{ p.quantite_vendue }} u.
+          </span>
+        </div>
+        <div *ngIf="topProduits.length === 0"
+             class="px-5 py-8 text-center text-xs text-gray-400">Aucune donnée</div>
+      </div>
+    </div>
+
+    <!-- Top Employés -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-gray-800">👷 Top Employés</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Par nombre de commandes</p>
+        </div>
+        <span class="text-xs text-gray-400 font-medium">{{ periodeTop }}</span>
+      </div>
+      <div class="divide-y divide-gray-50">
+        <div *ngFor="let e of topEmployes; let i = index; trackBy: trackByEmployeId"
+             class="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center
+                      text-xs font-bold shrink-0"
+               [ngClass]="i === 0
+                 ? 'bg-[#15803D] text-white'
+                 : 'bg-gray-100 text-gray-600'">
+            {{ getInitiales(e.nom) }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-700 truncate">{{ e.nom }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ formatMontant(e.total_ventes) }}</p>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="block text-sm font-bold text-gray-700">{{ e.nombre_commandes }}</span>
+            <span class="text-xs text-gray-400">cmds</span>
+          </div>
+        </div>
+        <div *ngIf="topEmployes.length === 0"
+             class="px-5 py-8 text-center text-xs text-gray-400">Aucune donnée</div>
+      </div>
+    </div>
+
+    <!-- Top Livreurs -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+        <div>
+          <h3 class="text-sm font-bold text-gray-800">🚚 Top Livreurs</h3>
+          <p class="text-xs text-gray-400 mt-0.5">Par nombre de livraisons</p>
+        </div>
+        <span class="text-xs text-gray-400 font-medium">{{ periodeTop }}</span>
+      </div>
+      <div class="divide-y divide-gray-50">
+        <div *ngFor="let l of topLivreurs; let i = index; trackBy: trackByLivreurId"
+             class="flex items-center gap-3 px-5 py-3.5 hover:bg-gray-50 transition-colors">
+          <div class="w-9 h-9 rounded-xl flex items-center justify-center
+                      text-xs font-bold shrink-0"
+               [ngClass]="i === 0
+                 ? 'bg-blue-500 text-white'
+                 : 'bg-gray-100 text-gray-600'">
+            {{ getInitiales(l.nom) }}
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-700 truncate">{{ l.nom }}</p>
+            <p class="text-xs text-gray-400 mt-0.5">{{ l.telephone }}</p>
+          </div>
+          <div class="text-right shrink-0">
+            <span class="block text-sm font-bold text-gray-700">{{ l.nombre_livraisons }}</span>
+            <span class="text-xs text-gray-400">livr.</span>
+          </div>
+        </div>
+        <div *ngIf="topLivreurs.length === 0"
+             class="px-5 py-8 text-center text-xs text-gray-400">Aucune donnée</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <!-- ── STOCK FAIBLE ───────────────────────────────────────── -->
+  <!-- ══════════════════════════════════════════════════════════ -->
+  <div *ngIf="!loadingSecondary"
+       class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+
+    <!-- Header -->
+    <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
+      <div>
+        <h3 class="text-sm font-bold text-gray-800">⚠️ Alertes Stock</h3>
+        <p class="text-xs text-gray-400 mt-0.5">{{ stockFaible.length }} produit(s) nécessitent votre attention</p>
+      </div>
+      <div class="flex items-center gap-4 text-xs text-gray-500">
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-red-500"></span>Rupture
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-orange-500"></span>Critique
+        </span>
+        <span class="flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full bg-yellow-400"></span>Faible
+        </span>
+      </div>
+    </div>
+
+    <!-- Tableau -->
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50/80 text-xs text-gray-400 font-bold uppercase tracking-widest">
+            <th class="text-left px-5 py-3">Produit</th>
+            <th class="text-left px-5 py-3">Catégorie</th>
+            <th class="text-right px-5 py-3">Prix vente</th>
+            <th class="text-right px-5 py-3">Seuil alerte</th>
+            <th class="text-right px-5 py-3">Stock actuel</th>
+            <th class="text-center px-5 py-3">Statut</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <tr *ngFor="let p of stockPagine; trackBy: trackById"
+              class="hover:bg-gray-50/60 transition-colors">
+            <td class="px-5 py-3.5 font-semibold text-gray-700">{{ p.nom }}</td>
+            <td class="px-5 py-3.5">
+              <span class="px-2 py-0.5 bg-gray-100 text-gray-500 rounded-md text-xs font-medium">
+                {{ p.categorie.nom }}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-right font-medium text-gray-600">
+              {{ formatMontant(p.prix_vente) }}
+            </td>
+            <td class="px-5 py-3.5 text-right text-gray-400">{{ p.seuil_alerte }}</td>
+            <td class="px-5 py-3.5 text-right font-bold text-lg"
+                [ngClass]="p.stock <= 0 ? 'text-red-500' : 'text-orange-500'">
+              {{ p.stock }}
+            </td>
+            <td class="px-5 py-3.5 text-center">
+              <span class="inline-flex items-center gap-1.5 px-2.5 py-1
+                           rounded-full text-xs font-bold"
+                    [ngClass]="stockBadge(p).bg">
+                <span class="w-1.5 h-1.5 rounded-full shrink-0"
+                      [ngClass]="stockBadge(p).dot"></span>
+                {{ stockBadge(p).label }}
+              </span>
+            </td>
+          </tr>
+          <tr *ngIf="stockFaible.length === 0">
+            <td colspan="6" class="px-5 py-10 text-center text-sm text-gray-400">
+              ✅ Aucun produit en alerte de stock
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="stockTotalPages > 1"
+         class="px-5 py-3 border-t border-gray-50 flex items-center justify-between">
+      <span class="text-xs text-gray-400">
+        Page {{ stockPage }} / {{ stockTotalPages }}
+        <span class="text-gray-300 mx-1">·</span>
+        {{ stockFaible.length }} produits
+      </span>
+      <div class="flex items-center gap-1">
+        <button (click)="stockPage = stockPage - 1" [disabled]="stockPage === 1"
+                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center
+                       text-gray-400 hover:bg-gray-50 disabled:opacity-30
+                       disabled:cursor-not-allowed transition-colors">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </button>
+        <button *ngFor="let page of stockPages; trackBy: trackByPage"
+                (click)="stockPage = page"
+                class="w-8 h-8 rounded-lg border text-xs font-bold transition-colors"
+                [ngClass]="stockPage === page
+                  ? 'bg-[#15803D] text-white border-[#15803D]'
+                  : 'border-gray-100 text-gray-400 hover:bg-gray-50'">
+          {{ page }}
+        </button>
+        <button (click)="stockPage = stockPage + 1" [disabled]="stockPage === stockTotalPages"
+                class="w-8 h-8 rounded-lg border border-gray-100 flex items-center justify-center
+                       text-gray-400 hover:bg-gray-50 disabled:opacity-30
+                       disabled:cursor-not-allowed transition-colors">
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
 </div>
