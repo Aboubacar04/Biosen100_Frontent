@@ -57,6 +57,55 @@ export interface StockFaible {
   categorie: { id: number; nom: string };
 }
 
+export interface StatsEmployeCommande {
+  id: number;
+  numero_commande: string;
+  boutique_id: number;
+  client_id: number | null;
+  employe_id: number;
+  livreur_id: number | null;
+  type_commande: string;
+  statut: string;
+  total: string;
+  date_commande: string;
+  date_validation: string | null;
+  date_annulation: string | null;
+  raison_annulation: string | null;
+  annulee_par: any;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+  client: {
+    id: number;
+    nom_complet: string;
+    telephone: string;
+    adresse: string;
+    boutique_id: number;
+    created_at: string;
+    updated_at: string;
+  } | null;
+}
+
+export interface StatsEmploye {
+  nombre_commandes: number;
+  total_ventes: string;
+  commandes: {
+    current_page: number;
+    data: StatsEmployeCommande[];
+    first_page_url: string;
+    from: number;
+    last_page: number;
+    last_page_url: string;
+    links: Array<{ url: string | null; label: string; active: boolean }>;
+    next_page_url: string | null;
+    path: string;
+    per_page: number;
+    prev_page_url: string | null;
+    to: number;
+    total: number;
+  };
+}
+
 @Injectable({ providedIn: 'root' })
 export class DashboardService {
   private api = 'http://localhost:8000/api/dashboard';
@@ -96,5 +145,22 @@ export class DashboardService {
 
   getStockFaible(boutiqueId?: number | null): Observable<StockFaible[]> {
     return this.http.get<StockFaible[]>(`${this.api}/stock-faible`, { params: this.params(boutiqueId) });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 📊 STATS EMPLOYÉ
+  // GET /api/dashboard/stats-employe/{employe}?periode=&search=&per_page=&page=
+  // ─────────────────────────────────────────────────────────────
+  getStatsEmploye(
+    employeId: number,
+    periode: Periode = 'mois',
+    boutiqueId?: number | null,
+    search?: string,
+    perPage: number = 15,
+    page: number = 1
+  ): Observable<StatsEmploye> {
+    return this.http.get<StatsEmploye>(`${this.api}/stats-employe/${employeId}`, {
+      params: this.params(boutiqueId, { periode, search, per_page: perPage, page })
+    });
   }
 }

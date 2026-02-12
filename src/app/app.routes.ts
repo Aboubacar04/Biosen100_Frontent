@@ -43,14 +43,150 @@ export const routes: Routes = [
         loadComponent: () => import('./pages/users/users.component')
           .then(m => m.UsersComponent),
       },
+
+      // ══════════════════════════════════════════════════════
+      // 👥 MODULE CLIENTS
+      // ══════════════════════════════════════════════════════
+      {
+        path: 'clients',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./pages/clients/client-list/client-list.component')
+              .then(m => m.ClientListComponent),
+          },
+          {
+            path: 'create',
+            loadComponent: () => import('./pages/clients/client-create/client-create.component')
+              .then(m => m.ClientCreateComponent),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./pages/clients/client-edit/client-edit.component')
+              .then(m => m.ClientEditComponent),
+          },
+        ],
+      },
+
+      // ══════════════════════════════════════════════════════
+      // 👷 MODULE EMPLOYÉS
+      // ══════════════════════════════════════════════════════
+      {
+        path: 'employes',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./pages/employes/employe-list/employe-list.component')
+              .then(m => m.EmployeListComponent),
+          },
+          {
+            path: 'create',
+            loadComponent: () => import('./pages/employes/employe-create/employe-create.component')
+              .then(m => m.EmployeCreateComponent),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./pages/employes/employe-edit/employe-edit.component')
+              .then(m => m.EmployeEditComponent),
+          },
+        ],
+      },
+
+      // ══════════════════════════════════════════════════════
+      // 🚚 MODULE LIVREURS
+      // ══════════════════════════════════════════════════════
+      {
+        path: 'livreurs',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./pages/livreurs/livreur-list/livreur-list.component')
+              .then(m => m.LivreurListComponent),
+          },
+          {
+            path: 'create',
+            loadComponent: () => import('./pages/livreurs/livreur-create/livreur-create.component')
+              .then(m => m.LivreurCreateComponent),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./pages/livreurs/livreur-edit/livreur-edit.component')
+              .then(m => m.LivreurEditComponent),
+          },
+        ],
+      },
+
+      // ══════════════════════════════════════════════════════
+      // 📦 MODULE PRODUITS
+      // ══════════════════════════════════════════════════════
+      {
+        path: 'produits',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./pages/produits/produit-list/produit-list.component')
+              .then(m => m.ProduitListComponent),
+          },
+          {
+            path: 'create',
+            loadComponent: () => import('./pages/produits/produit-create/produit-create.component')
+              .then(m => m.ProduitCreateComponent),
+          },
+          {
+            path: 'edit/:id',
+            loadComponent: () => import('./pages/produits/produit-edit/produit-edit.component')
+              .then(m => m.ProduitEditComponent),
+          },
+        ],
+      },
+
+      // ══════════════════════════════════════════════════════
+      // 📦 MODULE COMMANDES
+      // ══════════════════════════════════════════════════════
+      {
+        path: 'commandes',
+        children: [
+          {
+            path: '',
+            loadComponent: () => import('./pages/commandes/commande-list/commande-list.component')
+              .then(m => m.CommandeListComponent),
+          },
+          {
+            path: 'create',
+            loadComponent: () => import('./pages/commandes/commande-create/commande-create.component')
+              .then(m => m.CommandeCreateComponent),
+          },
+          {
+            path: 'en-cours',
+            loadComponent: () => import('./pages/commandes/commande-en-cours/commande-en-cours.component')
+              .then(m => m.CommandeEnCoursComponent),
+          },
+          {
+            path: 'validees',
+            loadComponent: () => import('./pages/commandes/commande-validees/commande-validees.component')
+              .then(m => m.CommandeValideesComponent),
+          },
+          {
+            path: 'annulees',
+            loadComponent: () => import('./pages/commandes/commande-annulees/commande-annulees.component')
+              .then(m => m.CommandeAnnuleesComponent),
+          },
+          {
+            path: 'today',
+            loadComponent: () => import('./pages/commandes/commande-today/commande-today.component')
+              .then(m => m.CommandeTodayComponent),
+          },
+          {
+            path: ':id',
+            loadComponent: () => import('./pages/commandes/commande-detail/commande-detail.component')
+              .then(m => m.CommandeDetailComponent),
+          },
+        ],
+      },
+
       // ── À ajouter au fur et à mesure ─────────────────────
       // { path: 'boutiques',  loadComponent: () => import('./pages/boutiques/boutiques.component').then(m => m.BoutiquesComponent)  },
       // { path: 'categories', loadComponent: () => import('./pages/categories/categories.component').then(m => m.CategoriesComponent) },
-      // { path: 'produits',   loadComponent: () => import('./pages/produits/produits.component').then(m => m.ProduitsComponent)     },
-      // { path: 'employes',   loadComponent: () => import('./pages/employes/employes.component').then(m => m.EmployesComponent)     },
-      // { path: 'livreurs',   loadComponent: () => import('./pages/livreurs/livreurs.component').then(m => m.LivreursComponent)     },
-      // { path: 'clients',    loadComponent: () => import('./pages/clients/clients.component').then(m => m.ClientsComponent)       },
-      // { path: 'commandes',  loadComponent: () => import('./pages/commandes/commandes.component').then(m => m.CommandesComponent)  },
       // { path: 'factures',   loadComponent: () => import('./pages/factures/factures.component').then(m => m.FacturesComponent)    },
       // { path: 'depenses',   loadComponent: () => import('./pages/depenses/depenses.component').then(m => m.DepensesComponent)    },
     ],

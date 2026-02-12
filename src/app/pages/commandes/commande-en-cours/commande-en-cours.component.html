@@ -1,0 +1,130 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Commandes en cours</h1>
+        <p class="text-gray-500 mt-1">Commandes en attente de validation</p>
+      </div>
+      <a
+        routerLink="/commandes/create"
+        class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nouvelle commande
+      </a>
+    </div>
+
+    <!-- LISTE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      @if (loading) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+        </div>
+      } @else if (commandes.length === 0) {
+        <div class="text-center py-12 text-gray-400">
+          <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p>Aucune commande en cours</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">N° Commande</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Client</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employé</th>
+                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Date</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (commande of commandes; track commande.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4">
+                    <p class="font-semibold text-gray-900">{{ commande.numero_commande }}</p>
+                  </td>
+                  <td class="px-6 py-4">
+                    @if (commande.client) {
+                      <p class="text-sm text-gray-900">{{ commande.client.nom_complet }}</p>
+                      <p class="text-xs text-gray-500">{{ commande.client.telephone }}</p>
+                    } @else {
+                      <span class="text-xs text-gray-400 italic">Sans client</span>
+                    }
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center gap-1.5 text-sm text-gray-700">
+                      @if (commande.type_commande === 'livraison') {
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"/>
+                        </svg>
+                        Livraison
+                      } @else {
+                        Sur place
+                      }
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    @if (commande.employe) {
+                      <p class="text-sm text-gray-900">{{ commande.employe.nom }}</p>
+                    }
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <p class="font-bold text-gray-900">{{ commande.total | number:'1.0-0' }} F</p>
+                  </td>
+                  <td class="px-6 py-4 text-center text-sm text-gray-600">
+                    {{ commande.created_at | date:'dd/MM/yyyy HH:mm' }}
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <a
+                      [routerLink]="['/commandes', commande.id]"
+                      class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm text-green-700 hover:bg-green-50 rounded-lg transition-all">
+                      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                      </svg>
+                      Voir
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        @if (pagination && pagination.last_page > 1) {
+          <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+              Page {{ filters.page }} sur {{ pagination.last_page }}
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                (click)="onPageChange(filters.page - 1)"
+                [disabled]="filters.page === 1"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Précédent
+              </button>
+              <button
+                (click)="onPageChange(filters.page + 1)"
+                [disabled]="filters.page === pagination.last_page"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>

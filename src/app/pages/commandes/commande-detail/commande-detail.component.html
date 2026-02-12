@@ -1,0 +1,426 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-5xl mx-auto">
+
+    @if (loading) {
+      <div class="flex items-center justify-center py-12">
+        <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </div>
+    } @else if (errorMessage && !commande) {
+      <div class="bg-red-50 border border-red-200 rounded-lg p-6 text-center">
+        <p class="text-red-700">{{ errorMessage }}</p>
+        <button
+          routerLink="/commandes"
+          class="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all">
+          Retour aux commandes
+        </button>
+      </div>
+    } @else if (commande) {
+
+      <!-- ✅ SUCCÈS -->
+      @if (successMessage) {
+        <div class="flex justify-center mb-6">
+          <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                      rounded-lg bg-[#15803D] shadow-md shadow-[#15803D]/25">
+            <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M20 6L9 17l-5-5"
+                  stroke="white" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">Opération réussie</span>
+              <span class="w-px h-3 bg-white/30"></span>
+              <span class="text-xs text-white/80">{{ successMessage }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ❌ ERREUR -->
+      @if (errorMessage) {
+        <div class="flex justify-center mb-6">
+          <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                      rounded-lg bg-red-500 shadow-md shadow-red-500/25">
+            <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+                <path d="M18 6L6 18M6 6l12 12"
+                  stroke="white" stroke-width="2.5"
+                  stroke-linecap="round"/>
+              </svg>
+            </div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-white">Erreur</span>
+              <span class="w-px h-3 bg-white/30"></span>
+              <span class="text-xs text-white/80">{{ errorMessage }}</span>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- HEADER -->
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-4">
+          <button
+            routerLink="/commandes"
+            class="p-2 hover:bg-white rounded-lg transition-all">
+            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+            </svg>
+          </button>
+          <div>
+            <h1 class="text-3xl font-bold text-gray-900">{{ commande.numero_commande }}</h1>
+            <p class="text-gray-500 mt-1">Détails de la commande</p>
+          </div>
+        </div>
+
+        <span [class]="getStatutClass(commande.statut)" class="px-4 py-2 rounded-full text-sm font-semibold">
+          {{ getStatutLabel(commande.statut) }}
+        </span>
+      </div>
+
+      <!-- INFORMATIONS PRINCIPALES -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Informations</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Type de commande</p>
+            <p class="font-medium text-gray-900">
+              @if (commande.type_commande === 'livraison') {
+                🚚 Livraison
+              } @else {
+                🏠 Sur place
+              }
+            </p>
+          </div>
+
+          <div>
+            <p class="text-sm text-gray-500 mb-1">Date de commande</p>
+            <p class="font-medium text-gray-900">{{ commande.date_commande | date:'dd/MM/yyyy à HH:mm' }}</p>
+          </div>
+
+          @if (commande.client) {
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Client</p>
+              <p class="font-medium text-gray-900">{{ commande.client.nom_complet }}</p>
+              <p class="text-sm text-gray-600">{{ commande.client.telephone }}</p>
+              @if (commande.client.adresse) {
+                <p class="text-xs text-gray-500 mt-1">{{ commande.client.adresse }}</p>
+              }
+            </div>
+          }
+
+          @if (commande.employe) {
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Employé</p>
+              <p class="font-medium text-gray-900">{{ commande.employe.nom }}</p>
+              <p class="text-sm text-gray-600">{{ commande.employe.telephone }}</p>
+            </div>
+          }
+
+          @if (commande.livreur) {
+            <div>
+              <p class="text-sm text-gray-500 mb-1">Livreur</p>
+              <p class="font-medium text-gray-900">{{ commande.livreur.nom }}</p>
+              <p class="text-sm text-gray-600">{{ commande.livreur.telephone }}</p>
+            </div>
+          }
+
+          @if (commande.notes) {
+            <div class="md:col-span-2">
+              <p class="text-sm text-gray-500 mb-1">Notes</p>
+              <p class="text-sm text-gray-700 italic">{{ commande.notes }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- PRODUITS -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+        <h2 class="text-lg font-semibold text-gray-900 mb-4">Produits</h2>
+
+        @if (commande.produits && commande.produits.length > 0) {
+          <div class="overflow-x-auto">
+            <table class="w-full">
+              <thead class="bg-gray-50 border-b border-gray-200">
+                <tr>
+                  <th class="px-4 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Produit</th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Prix unit.</th>
+                  <th class="px-4 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Quantité</th>
+                  <th class="px-4 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Sous-total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                @for (produit of commande.produits; track produit.id) {
+                  <tr>
+                    <td class="px-4 py-3">
+                      <p class="font-medium text-gray-900">{{ produit.nom }}</p>
+                    </td>
+                    <td class="px-4 py-3 text-center text-gray-700">
+                      {{ produit.pivot?.prix_unitaire | number:'1.0-0' }} F
+                    </td>
+                    <td class="px-4 py-3 text-center font-semibold text-gray-900">
+                      {{ produit.pivot?.quantite }}
+                    </td>
+                    <td class="px-4 py-3 text-right font-semibold text-gray-900">
+                      {{ produit.pivot?.sous_total | number:'1.0-0' }} F
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="mt-6 pt-4 border-t border-gray-200 flex justify-end">
+            <div class="text-right">
+              <p class="text-sm text-gray-500">Total</p>
+              <p class="text-4xl font-bold text-green-700">{{ commande.total | number:'1.0-0' }} F</p>
+            </div>
+          </div>
+        } @else {
+          <p class="text-center text-gray-400 py-6">Aucun produit</p>
+        }
+      </div>
+
+      <!-- FACTURE (si validée) -->
+      @if (commande.statut === 'validee' && commande.facture) {
+        <div class="bg-green-50 border border-green-200 rounded-xl p-6 mb-6">
+          <h2 class="text-lg font-semibold text-green-900 mb-2">Facture</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-sm text-green-700">Numéro</p>
+              <p class="font-bold text-green-900">{{ commande.facture.numero_facture }}</p>
+            </div>
+            <div>
+              <p class="text-sm text-green-700">Date</p>
+              <p class="font-medium text-green-900">{{ commande.facture.date_facture | date:'dd/MM/yyyy' }}</p>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- ANNULATION (si annulée) -->
+      @if (commande.statut === 'annulee') {
+        <div class="bg-red-50 border border-red-200 rounded-xl p-6 mb-6">
+          <h2 class="text-lg font-semibold text-red-900 mb-2">Annulation</h2>
+          @if (commande.raison_annulation) {
+            <p class="text-sm text-red-700 mb-2">{{ commande.raison_annulation }}</p>
+          }
+          @if (commande.annulee_par) {
+            <p class="text-xs text-red-600">Par {{ commande.annulee_par.nom }} le {{ commande.date_annulation | date:'dd/MM/yyyy à HH:mm' }}</p>
+          }
+        </div>
+      }
+
+      <!-- ACTIONS -->
+      @if (commande.statut === 'en_cours') {
+        <div class="flex items-center gap-4">
+          <button
+            (click)="ouvrirModalValidation()"
+            class="flex-1 px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Valider la commande
+          </button>
+          <button
+            (click)="ouvrirModalAnnulation()"
+            class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Annuler la commande
+          </button>
+        </div>
+      }
+
+    }
+
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 🔲 MODAL VALIDATION -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+@if (showValidationModal) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Valider la commande</h3>
+      <p class="text-sm text-gray-600 mb-6">
+        Confirmez-vous la validation de cette commande ? Une facture sera automatiquement générée.
+      </p>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showValidationModal = false"
+          [disabled]="validationLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        <button
+          (click)="validerCommande()"
+          [disabled]="validationLoading"
+          class="px-4 py-2 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all disabled:opacity-50 flex items-center gap-2">
+          @if (validationLoading) {
+            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+          }
+          Confirmer
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 🔲 MODAL ANNULATION -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+@if (showAnnulationModal) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Annuler la commande</h3>
+
+      <form [formGroup]="annulationForm" (ngSubmit)="annulerCommande()">
+        <div class="mb-6">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Raison de l'annulation *</label>
+          <textarea
+            formControlName="raison"
+            rows="4"
+            placeholder="Ex: Client a annulé, Produit indisponible..."
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-600 focus:border-transparent outline-none resize-none">
+          </textarea>
+        </div>
+
+        <div class="flex items-center justify-end gap-3">
+          <button
+            type="button"
+            (click)="showAnnulationModal = false"
+            [disabled]="annulationLoading"
+            class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+            Annuler
+          </button>
+          <button
+            type="submit"
+            [disabled]="annulationForm.invalid || annulationLoading"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+            @if (annulationLoading) {
+              <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+            }
+            Confirmer l'annulation
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- ═══════════════════════════════════════════════════════════════ -->
+<!-- 🔲 MODAL FACTURE (après validation) -->
+<!-- ═══════════════════════════════════════════════════════════════ -->
+@if (showFactureModal && factureData) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+      <!-- Header -->
+      <div class="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+        <h3 class="text-xl font-bold text-gray-900">Facture générée</h3>
+        <button
+          (click)="fermerModalFacture()"
+          class="p-2 hover:bg-gray-100 rounded-lg transition-all">
+          <svg class="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Contenu facture -->
+      <div class="p-6 print:p-8">
+        <div class="border-2 border-gray-300 rounded-lg p-8">
+          <div class="text-center mb-6">
+            <h1 class="text-2xl font-bold text-gray-900">FACTURE</h1>
+            <p class="text-lg text-gray-600 mt-1">{{ factureData.numero_facture }}</p>
+            <p class="text-sm text-gray-500">{{ factureData.date_emission | date:'dd/MM/yyyy' }}</p>
+          </div>
+
+          <div class="grid grid-cols-2 gap-6 mb-6 pb-6 border-b border-gray-200">
+            <div>
+              <p class="text-xs text-gray-500 uppercase mb-2">Boutique</p>
+              <p class="font-semibold text-gray-900">{{ factureData.boutique.nom }}</p>
+              <p class="text-sm text-gray-600">{{ factureData.boutique.adresse }}</p>
+              <p class="text-sm text-gray-600">{{ factureData.boutique.telephone }}</p>
+            </div>
+            @if (factureData.client) {
+              <div>
+                <p class="text-xs text-gray-500 uppercase mb-2">Client</p>
+                <p class="font-semibold text-gray-900">{{ factureData.client.nom }}</p>
+                <p class="text-sm text-gray-600">{{ factureData.client.telephone }}</p>
+              </div>
+            }
+          </div>
+
+          <table class="w-full mb-6">
+            <thead class="bg-gray-50 border-b-2 border-gray-300">
+              <tr>
+                <th class="px-4 py-2 text-left text-xs font-semibold text-gray-600 uppercase">Produit</th>
+                <th class="px-4 py-2 text-center text-xs font-semibold text-gray-600 uppercase">Qté</th>
+                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase">P.U.</th>
+                <th class="px-4 py-2 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+              @for (produit of factureData.produits; track $index) {
+                <tr>
+                  <td class="px-4 py-2 text-sm text-gray-900">{{ produit.nom }}</td>
+                  <td class="px-4 py-2 text-center text-sm text-gray-900">{{ produit.quantite }}</td>
+                  <td class="px-4 py-2 text-right text-sm text-gray-900">{{ produit.prix_unitaire | number:'1.0-0' }} F</td>
+                  <td class="px-4 py-2 text-right text-sm font-semibold text-gray-900">{{ produit.sous_total | number:'1.0-0' }} F</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="flex justify-end">
+            <div class="w-64 border-t-2 border-gray-300 pt-4">
+              <div class="flex justify-between items-center">
+                <span class="text-lg font-bold text-gray-900">TOTAL</span>
+                <span class="text-2xl font-bold text-green-700">{{ factureData.total | number:'1.0-0' }} F</span>
+              </div>
+            </div>
+          </div>
+
+          @if (factureData.notes) {
+            <div class="mt-6 pt-6 border-t border-gray-200">
+              <p class="text-xs text-gray-500 uppercase mb-2">Notes</p>
+              <p class="text-sm text-gray-700 italic">{{ factureData.notes }}</p>
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Footer actions -->
+      <div class="sticky bottom-0 bg-white border-t border-gray-200 p-6 flex items-center gap-4">
+        <button
+          (click)="imprimerFacture()"
+          class="flex-1 px-6 py-3 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center justify-center gap-2">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+          </svg>
+          Imprimer
+        </button>
+        <button
+          (click)="fermerModalFacture()"
+          class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium">
+          Fermer
+        </button>
+      </div>
+    </div>
+  </div>
+}

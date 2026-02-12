@@ -1,0 +1,207 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Clients</h1>
+        <p class="text-gray-500 mt-1">Gérer les clients</p>
+      </div>
+      <a
+        routerLink="/clients/create"
+        class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nouveau client
+      </a>
+    </div>
+
+    <!-- ✅ SUCCÈS -->
+    @if (successMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-[#15803D] shadow-md shadow-[#15803D]/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Opération réussie</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ successMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ❌ ERREUR -->
+    @if (errorMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-red-500 shadow-md shadow-red-500/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Erreur</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ errorMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- RECHERCHE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+      <div class="flex gap-3">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Rechercher par nom ou téléphone..."
+          class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none"
+        />
+        <svg class="w-5 h-5 text-gray-400 my-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- LISTE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      @if (loading) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+        </div>
+      } @else if (clients.length === 0) {
+        <div class="text-center py-12 text-gray-400">
+          <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/>
+          </svg>
+          <p>Aucun client trouvé</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Nom</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Téléphone</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Adresse</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Commandes</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (client of clients; track client.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4">
+                    <p class="font-semibold text-gray-900">{{ client.nom_complet }}</p>
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600">
+                    {{ client.telephone }}
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600">
+                    {{ client.adresse || '-' }}
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span class="inline-flex items-center justify-center w-8 h-8 rounded-full bg-green-100 text-green-700 font-semibold text-sm">
+                      {{ client.commandes_count || 0 }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-center gap-2">
+                      <a
+                        [routerLink]="['/clients/edit', client.id]"
+                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      </a>
+                      <button
+                        (click)="openDeleteModal(client)"
+                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        @if (pagination && pagination.last_page > 1) {
+          <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+              Affichage de {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} clients
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                (click)="onPageChange(filters.page - 1)"
+                [disabled]="filters.page === 1"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Précédent
+              </button>
+              <button
+                (click)="onPageChange(filters.page + 1)"
+                [disabled]="filters.page === pagination.last_page"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL SUPPRESSION -->
+@if (showDeleteModal && clientToDelete) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Supprimer le client</h3>
+      <p class="text-sm text-gray-600 mb-6">
+        Êtes-vous sûr de vouloir supprimer <strong>{{ clientToDelete.nom_complet }}</strong> ?
+        Cette action est irréversible.
+      </p>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showDeleteModal = false"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        <button
+          (click)="confirmDelete()"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+          @if (deleteLoading) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+          }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}

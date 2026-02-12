@@ -1,45 +1,44 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { RouterLink, RouterLinkActive } from '@angular/router';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../core/services/auth.service';
 
-interface NavItem {
+export interface NavItem {
+  route: string;
   label: string;
   icon: string;
-  route: string;
   adminOnly?: boolean;
 }
 
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [CommonModule, RouterLink, RouterLinkActive],
-  templateUrl: './sidebar.component.html'
+  imports: [CommonModule, RouterModule],
+  templateUrl: './sidebar.component.html',
 })
-export class SidebarComponent {
+export class SidebarComponent implements OnInit {
   @Input() isOpen = true;
 
-  allNavItems: NavItem[] = [
-    { label: 'Tableau de bord', icon: '📊', route: '/dashboard'  },
-    { label: 'Commandes',       icon: '🛒', route: '/commandes'  },
-    { label: 'Produits',        icon: '📦', route: '/produits'   },
-    { label: 'Factures',        icon: '🧾', route: '/factures'   },
-    { label: 'Catégories',      icon: '📂', route: '/categories' },
-    { label: 'Employés',        icon: '👷', route: '/employes'   },
-    { label: 'Livreurs',        icon: '🚚', route: '/livreurs'   },
-    { label: 'Clients',         icon: '👥', route: '/clients'    },
-    { label: 'Dépenses',        icon: '💰', route: '/depenses'   },
-    // Admin seulement
-    { label: 'Utilisateurs',    icon: '👤', route: '/users',     adminOnly: true },
-    { label: 'Boutiques',       icon: '🏪', route: '/boutiques', adminOnly: true },
+  readonly allNavItems: NavItem[] = [
+    { route: '/dashboard',  label: 'Tableau de bord', icon: 'dashboard'  },
+    { route: '/commandes',  label: 'Commandes',        icon: 'commandes'  },
+    { route: '/produits',   label: 'Produits',          icon: 'produits'   },
+    { route: '/categories', label: 'Catégories',        icon: 'categories' },
+    { route: '/clients',    label: 'Clients',           icon: 'clients'    },
+    { route: '/employes',   label: 'Employés',          icon: 'employes'   },
+    { route: '/livreurs',   label: 'Livreurs',          icon: 'livreurs'   },
+    { route: '/depenses',   label: 'Dépenses',          icon: 'depenses'   },
+    { route: '/boutiques',  label: 'Boutiques',         icon: 'boutiques',  adminOnly: true },
+    { route: '/users',      label: 'Utilisateurs',      icon: 'users',      adminOnly: true },
   ];
+
+  navItems: NavItem[] = [];
 
   constructor(public authService: AuthService) {}
 
-  get navItems(): NavItem[] {
-    if (this.authService.isAdmin()) {
-      return this.allNavItems;
-    }
-    return this.allNavItems.filter(item => !item.adminOnly);
+  ngOnInit(): void {
+    this.navItems = this.allNavItems.filter(
+      item => !item.adminOnly || this.authService.isAdmin()
+    );
   }
 }

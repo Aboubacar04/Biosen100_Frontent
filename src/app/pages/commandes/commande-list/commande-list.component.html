@@ -1,0 +1,282 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Commandes</h1>
+        <p class="text-gray-500 mt-1">Gérer toutes les commandes</p>
+      </div>
+      <a
+        routerLink="/commandes/create"
+        class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nouvelle commande
+      </a>
+    </div>
+
+    <!-- ✅ SUCCÈS -->
+    @if (successMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-[#15803D] shadow-md shadow-[#15803D]/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Opération réussie</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ successMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ❌ ERREUR -->
+    @if (errorMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-red-500 shadow-md shadow-red-500/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Erreur</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ errorMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- BOUTONS NAVIGATION -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <a
+        routerLink="/commandes/today"
+        class="flex items-center gap-3 bg-white border-2 border-purple-600 text-purple-600 rounded-xl p-4 hover:bg-purple-50 transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold">Aujourd'hui</p>
+          <p class="text-xs opacity-75">Commandes du jour</p>
+        </div>
+      </a>
+
+      <a
+        routerLink="/commandes/en-cours"
+        class="flex items-center gap-3 bg-white border-2 border-blue-600 text-blue-600 rounded-xl p-4 hover:bg-blue-50 transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold">En cours</p>
+          <p class="text-xs opacity-75">À traiter</p>
+        </div>
+      </a>
+
+      <a
+        routerLink="/commandes/validees"
+        class="flex items-center gap-3 bg-white border-2 border-green-600 text-green-600 rounded-xl p-4 hover:bg-green-50 transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold">Validées</p>
+          <p class="text-xs opacity-75">Terminées</p>
+        </div>
+      </a>
+
+      <a
+        routerLink="/commandes/annulees"
+        class="flex items-center gap-3 bg-white border-2 border-red-600 text-red-600 rounded-xl p-4 hover:bg-red-50 transition-all">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <div>
+          <p class="text-sm font-semibold">Annulées</p>
+          <p class="text-xs opacity-75">Refusées</p>
+        </div>
+      </a>
+    </div>
+
+    <!-- RECHERCHE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <label class="block text-sm font-medium text-gray-700 mb-2">Rechercher une commande</label>
+      <input
+        type="text"
+        [(ngModel)]="searchQuery"
+        (ngModelChange)="onSearchChange()"
+        placeholder="N° commande, nom client, téléphone..."
+        class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none"
+      />
+    </div>
+
+    <!-- LISTE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      @if (loading) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+        </div>
+      } @else if (commandes.length === 0) {
+        <div class="text-center py-12 text-gray-400">
+          <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+          </svg>
+          <p>Aucune commande trouvée</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">N° Commande</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Client</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Employé</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Type</th>
+                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Total</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Statut</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (commande of commandes; track commande.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4">
+                    <p class="font-semibold text-gray-900">{{ commande.numero_commande }}</p>
+                    <p class="text-xs text-gray-500">{{ commande.date_commande | date:'dd/MM/yyyy HH:mm' }}</p>
+                  </td>
+                  <td class="px-6 py-4">
+                    @if (commande.client) {
+                      <p class="text-sm font-medium text-gray-900">{{ commande.client.nom_complet }}</p>
+                      <p class="text-xs text-gray-500">{{ commande.client.telephone }}</p>
+                    } @else {
+                      <p class="text-sm text-gray-400 italic">Sans client</p>
+                    }
+                  </td>
+                  <td class="px-6 py-4 text-sm text-gray-600">
+                    {{ commande.employe?.nom }}
+                  </td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs">
+                      {{ commande.type_commande === 'livraison' ? '🚚 Livraison' : '🏪 Sur place' }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <p class="font-bold text-gray-900">{{ commande.total | number:'1.0-0' }} F</p>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <span [class]="getStatutClass(commande.statut)" class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold">
+                      {{ getStatutLabel(commande.statut) }}
+                    </span>
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-center gap-2">
+                      <a
+                        [routerLink]="['/commandes', commande.id]"
+                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                        </svg>
+                      </a>
+                      @if (commande.statut !== 'annulee') {
+                        <button
+                          (click)="openAnnulerModal(commande)"
+                          class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                          </svg>
+                        </button>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        @if (pagination && pagination.last_page > 1) {
+          <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+              Affichage de {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} commandes
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                (click)="onPageChange(filters.page - 1)"
+                [disabled]="filters.page === 1"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Précédent
+              </button>
+              <button
+                (click)="onPageChange(filters.page + 1)"
+                [disabled]="filters.page === pagination.last_page"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL ANNULATION -->
+@if (showAnnulerModal && commandeToAnnuler) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Annuler la commande</h3>
+      <p class="text-sm text-gray-600 mb-4">
+        Commande : <strong>{{ commandeToAnnuler.numero_commande }}</strong>
+      </p>
+
+      <div class="mb-6">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Raison de l'annulation *</label>
+        <textarea
+          [(ngModel)]="raisonAnnulation"
+          rows="3"
+          placeholder="Ex: Client a changé d'avis, erreur de saisie..."
+          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-700 focus:border-transparent outline-none resize-none">
+        </textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showAnnulerModal = false"
+          [disabled]="annulerLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        <button
+          (click)="confirmAnnuler()"
+          [disabled]="annulerLoading || !raisonAnnulation.trim()"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+          @if (annulerLoading) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+          }
+          Confirmer l'annulation
+        </button>
+      </div>
+    </div>
+  </div>
+}

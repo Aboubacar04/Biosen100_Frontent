@@ -1,0 +1,270 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Produits</h1>
+        <p class="text-gray-500 mt-1">Gérer les produits</p>
+      </div>
+      <a
+        routerLink="/produits/create"
+        class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nouveau produit
+      </a>
+    </div>
+
+    <!-- ✅ SUCCÈS -->
+    @if (successMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-[#15803D] shadow-md shadow-[#15803D]/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Opération réussie</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ successMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ❌ ERREUR -->
+    @if (errorMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-red-500 shadow-md shadow-red-500/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Erreur</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ errorMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- 🔍 RECHERCHE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+      <div class="flex gap-3">
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange()"
+          placeholder="Rechercher par nom..."
+          class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none"
+        />
+        <svg class="w-5 h-5 text-gray-400 my-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+      </div>
+    </div>
+
+    <!-- FILTRES -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Statut</label>
+          <select
+            [(ngModel)]="filters.actif"
+            (ngModelChange)="onFilterChange()"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none">
+            <option [value]="null">Tous</option>
+            <option [value]="true">Actifs seulement</option>
+            <option [value]="false">Inactifs seulement</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Par page</label>
+          <select
+            [(ngModel)]="filters.per_page"
+            (ngModelChange)="onFilterChange()"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none">
+            <option [value]="10">10</option>
+            <option [value]="15">15</option>
+            <option [value]="25">25</option>
+            <option [value]="50">50</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- LISTE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      @if (loading) {
+        <div class="flex items-center justify-center py-12">
+          <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+          </svg>
+        </div>
+      } @else if (produits.length === 0) {
+        <div class="text-center py-12 text-gray-400">
+          <svg class="w-16 h-16 mx-auto mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          <p>Aucun produit trouvé</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead class="bg-gray-50 border-b border-gray-200">
+              <tr>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Produit</th>
+                <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase">Catégorie</th>
+                <th class="px-6 py-3 text-right text-xs font-semibold text-gray-600 uppercase">Prix</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Stock</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Statut</th>
+                <th class="px-6 py-3 text-center text-xs font-semibold text-gray-600 uppercase">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (produit of produits; track produit.id) {
+                <tr class="hover:bg-gray-50 transition-colors">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <img
+                        [src]="getImageUrl(produit.image)"
+                        [alt]="produit.nom"
+                        class="w-12 h-12 rounded-lg object-cover border border-gray-200"
+                      />
+                      <div>
+                        <p class="font-semibold text-gray-900">{{ produit.nom }}</p>
+                        @if (produit.description) {
+                          <p class="text-xs text-gray-500 truncate max-w-xs">{{ produit.description }}</p>
+                        }
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4">
+                    @if (produit.categorie) {
+                      <span class="inline-flex items-center px-2.5 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                        {{ produit.categorie.nom }}
+                      </span>
+                    }
+                  </td>
+                  <td class="px-6 py-4 text-right">
+                    <p class="font-bold text-gray-900">{{ produit.prix_vente | number:'1.0-0' }} F</p>
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    <p [class]="getStockClass(produit)" class="font-semibold">
+                      {{ produit.stock }}
+                    </p>
+                    @if (produit.stock <= produit.seuil_alerte && produit.stock > 0) {
+                      <p class="text-xs text-orange-600">⚠️ Alerte</p>
+                    }
+                    @if (produit.stock <= 0) {
+                      <p class="text-xs text-red-600">Rupture</p>
+                    }
+                  </td>
+                  <td class="px-6 py-4 text-center">
+                    @if (produit.actif) {
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-green-100 text-green-700 rounded-full text-xs font-semibold">
+                        Actif
+                      </span>
+                    } @else {
+                      <span class="inline-flex items-center gap-1.5 px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-xs font-semibold">
+                        Inactif
+                      </span>
+                    }
+                  </td>
+                  <td class="px-6 py-4">
+                    <div class="flex items-center justify-center gap-2">
+                      <a
+                        [routerLink]="['/produits/edit', produit.id]"
+                        class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                        </svg>
+                      </a>
+                      <button
+                        (click)="openDeleteModal(produit)"
+                        class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                        </svg>
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- PAGINATION -->
+        @if (pagination && pagination.last_page > 1) {
+          <div class="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+            <p class="text-sm text-gray-600">
+              Affichage de {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} produits
+            </p>
+            <div class="flex items-center gap-2">
+              <button
+                (click)="onPageChange(filters.page - 1)"
+                [disabled]="filters.page === 1"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Précédent
+              </button>
+              <button
+                (click)="onPageChange(filters.page + 1)"
+                [disabled]="filters.page === pagination.last_page"
+                class="px-3 py-1.5 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+                Suivant
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL SUPPRESSION -->
+@if (showDeleteModal && produitToDelete) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Supprimer le produit</h3>
+      <p class="text-sm text-gray-600 mb-6">
+        Êtes-vous sûr de vouloir supprimer <strong>{{ produitToDelete.nom }}</strong> ?
+      </p>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showDeleteModal = false"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        <button
+          (click)="confirmDelete()"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+          @if (deleteLoading) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+          }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}
