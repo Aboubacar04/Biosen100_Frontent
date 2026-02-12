@@ -1,0 +1,308 @@
+<!-- ═══ LOADING ══════════════════════════════════════════════ -->
+<div *ngIf="loading"
+     class="flex flex-col items-center justify-center min-h-[70vh] gap-4">
+  <div class="w-12 h-12 rounded-full border-4 border-[#15803D] border-t-transparent animate-spin"></div>
+  <p class="text-sm text-gray-400">Chargement des informations employé...</p>
+</div>
+
+<!-- ═══ ERREUR ════════════════════════════════════════════════ -->
+<div *ngIf="!loading && errorMessage"
+     class="flex flex-col items-center justify-center min-h-[70vh] gap-4">
+  <div class="w-16 h-16 rounded-full bg-red-100 flex items-center justify-center">
+    <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+  </div>
+  <h3 class="text-lg font-bold text-gray-800">{{ errorMessage }}</h3>
+  <a routerLink="/employes"
+     class="px-6 py-2.5 bg-[#15803D] text-white rounded-lg font-medium hover:bg-[#166534] transition-colors">
+    Retour à la liste
+  </a>
+</div>
+
+<!-- ═══ CONTENU ═══════════════════════════════════════════════ -->
+<div *ngIf="!loading && !errorMessage && employe" class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- ═══ HEADER ═══════════════════════════════════════════ -->
+    <div class="flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <a routerLink="/employes"
+           class="p-2 hover:bg-white rounded-lg transition-colors">
+          <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+          </svg>
+        </a>
+        <div>
+          <h1 class="text-2xl font-black text-gray-800 tracking-tight">{{ employe.nom }}</h1>
+          <p class="text-sm text-gray-400 mt-0.5">Profil et performances de l'employé</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <a [routerLink]="['/employes/edit', employe.id]"
+           class="flex items-center gap-2 px-4 py-2 bg-amber-500 text-white
+                  rounded-xl text-sm font-semibold hover:bg-amber-600 transition-colors">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+          </svg>
+          Modifier
+        </a>
+      </div>
+    </div>
+
+    <!-- ═══ CARTE EMPLOYÉ AVEC PHOTO ═════════════════════════ -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="bg-gradient-to-r from-indigo-600 to-indigo-500 px-6 py-5">
+        <div class="flex items-center gap-6">
+
+          <!-- 📸 PHOTO STYLE CARTE D'IDENTITÉ 128x128px -->
+          <div class="relative shrink-0">
+            <div class="w-32 h-32 rounded-lg overflow-hidden bg-white/10 backdrop-blur
+                        ring-4 ring-white/20 shadow-2xl">
+              <img *ngIf="employe.photo"
+                   [src]="employe.photo"
+                   [alt]="employe.nom"
+                   class="w-full h-full object-cover"
+              />
+              <div *ngIf="!employe.photo"
+                   class="w-full h-full bg-gradient-to-br from-indigo-400 to-indigo-600
+                          flex items-center justify-center">
+                <span class="text-4xl font-black text-white">{{ getInitiales(employe.nom) }}</span>
+              </div>
+            </div>
+            <!-- Badge photo manquante -->
+            <div *ngIf="!employe.photo"
+                 class="absolute -bottom-2 -right-2 w-8 h-8 bg-amber-500 rounded-full
+                        flex items-center justify-center ring-2 ring-white shadow-lg"
+                 title="Photo manquante">
+              <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/>
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"/>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Infos employé -->
+          <div class="flex-1">
+            <h2 class="text-xl font-black text-white">{{ employe.nom }}</h2>
+            <p class="text-sm text-white/80 mt-1">Employé depuis {{ employe.created_at | date:'MMMM yyyy':'':'fr' }}</p>
+            <div class="flex items-center gap-2 mt-3">
+              <span class="px-3 py-1 rounded-full text-xs font-bold"
+                    [ngClass]="employe.actif ? 'bg-white/20 text-white' : 'bg-red-500 text-white'">
+                {{ employe.actif ? '✓ ACTIF' : '✗ INACTIF' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-6">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400 font-bold uppercase">Téléphone</p>
+              <p class="text-sm font-bold text-gray-800 mt-1">{{ employe.telephone }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <div class="w-10 h-10 rounded-lg bg-purple-50 flex items-center justify-center shrink-0">
+              <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+              </svg>
+            </div>
+            <div>
+              <p class="text-xs text-gray-400 font-bold uppercase">Boutique</p>
+              <p class="text-sm font-bold text-gray-800 mt-1">{{ employe.boutique?.nom || 'N/A' }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ STATISTIQUES (5 CARTES) ══════════════════════════ -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Commandes</p>
+            <p class="text-3xl font-black text-gray-800">{{ stats.total_commandes }}</p>
+          </div>
+          <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="flex gap-2 text-xs">
+          <span class="px-2 py-0.5 bg-green-100 text-green-700 rounded-full font-bold">{{ stats.commandes_validees }} validées</span>
+        </div>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Total ventes</p>
+            <p class="text-2xl font-black text-[#15803D]">{{ f(stats.total_ventes) }}</p>
+          </div>
+          <div class="w-10 h-10 bg-[#15803D]/10 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500">Toutes commandes</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Vente moy.</p>
+            <p class="text-2xl font-black text-gray-800">{{ f(stats.vente_moyenne) }}</p>
+          </div>
+          <div class="w-10 h-10 bg-purple-50 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500">Par commande</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Aujourd'hui</p>
+            <p class="text-2xl font-black text-blue-600">{{ f(stats.ventes_jour) }}</p>
+          </div>
+          <div class="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+        <p class="text-xs text-gray-500">Ventes du jour</p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
+        <div class="flex items-start justify-between mb-3">
+          <div>
+            <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Ce mois</p>
+            <p class="text-2xl font-black text-indigo-600">{{ f(stats.ventes_mois) }}</p>
+          </div>
+          <div class="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+            </svg>
+          </div>
+        </div>
+        <div class="flex gap-2 text-xs">
+          <span *ngIf="stats.commandes_en_cours > 0" class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full font-bold">{{ stats.commandes_en_cours }} en cours</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ═══ HISTORIQUE COMMANDES ══════════════════════════════ -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-black text-gray-800">📊 Historique des ventes</h3>
+          <p class="text-sm text-gray-400 mt-1">{{ commandes.length }} commande(s) traitée(s)</p>
+        </div>
+      </div>
+
+      <!-- LISTE COMMANDES -->
+      <div>
+        <div *ngIf="commandes.length === 0" class="text-center py-12">
+          <svg class="w-16 h-16 mx-auto text-gray-300 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+          </svg>
+          <h3 class="text-lg font-bold text-gray-700">Aucune commande</h3>
+          <p class="text-sm text-gray-500 mt-1">Cet employé n'a pas encore traité de commande</p>
+        </div>
+
+        <div *ngIf="commandes.length > 0" class="divide-y divide-gray-50">
+          <div *ngFor="let cmd of commandesPagine; trackBy: trackById"
+               class="flex items-center gap-4 p-6 hover:bg-gray-50 transition-colors">
+
+            <!-- Icône -->
+            <div class="w-12 h-12 rounded-lg flex items-center justify-center shrink-0"
+                 [ngClass]="
+                   cmd.statut === 'validee' ? 'bg-green-100' :
+                   cmd.statut === 'en_cours' ? 'bg-blue-100' :
+                   'bg-red-100'
+                 ">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                   [ngClass]="
+                     cmd.statut === 'validee' ? 'text-green-600' :
+                     cmd.statut === 'en_cours' ? 'text-blue-600' :
+                     'text-red-600'
+                   ">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>
+              </svg>
+            </div>
+
+            <!-- Infos -->
+            <div class="flex-1">
+              <div class="flex items-center gap-2">
+                <h4 class="text-sm font-bold text-gray-800">{{ cmd.numero_commande }}</h4>
+                <span class="px-2 py-0.5 rounded-full text-xs font-bold" [ngClass]="getStatutClass(cmd.statut)">
+                  {{ getStatutLabel(cmd.statut) }}
+                </span>
+              </div>
+              <p class="text-xs text-gray-500 mt-1">
+                {{ cmd.created_at | date:'dd/MM/yyyy HH:mm' }}
+                <span *ngIf="cmd.client"> • Client: {{ cmd.client.nom_complet }}</span>
+              </p>
+              <p class="text-xs text-gray-400 mt-0.5" *ngIf="cmd.notes">📝 {{ cmd.notes }}</p>
+            </div>
+
+            <!-- Montant -->
+            <div class="text-right">
+              <p class="text-lg font-black text-gray-800">{{ f(cmd.total) }}</p>
+              <p class="text-xs text-gray-400">{{ cmd.type_commande === 'livraison' ? '🚚 Livraison' : '🏪 Sur place' }}</p>
+            </div>
+
+            <!-- Action -->
+            <a [routerLink]="['/commandes', cmd.id]"
+               class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+              </svg>
+            </a>
+          </div>
+        </div>
+
+        <!-- PAGINATION -->
+        <div *ngIf="commandesTotalPages > 1" class="px-6 py-4 border-t border-gray-100 flex justify-center gap-2">
+          <button *ngFor="let page of commandesPages; trackBy: trackByPage"
+                  (click)="commandesPage = page"
+                  class="px-3 py-1.5 text-sm font-medium rounded-lg transition-colors"
+                  [ngClass]="page === commandesPage
+                    ? 'bg-[#15803D] text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'">
+            {{ page }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- ═══ BOUTON SCROLL TO TOP ═══════════════════════════════ -->
+<button *ngIf="showScrollTop"
+        (click)="scrollToTop()"
+        class="fixed bottom-8 right-8 w-12 h-12 bg-[#15803D] text-white rounded-full
+               shadow-lg hover:bg-[#166534] transition-all hover:scale-110 z-50
+               flex items-center justify-center"
+        title="Retour en haut">
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+  </svg>
+</button>

@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from './core/guards/auth.guard';
+import { LivreurDetailComponent } from './pages/livreurs/livreur-detail/livreur-detail.component';
 
 export const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' },
@@ -65,32 +66,42 @@ export const routes: Routes = [
             loadComponent: () => import('./pages/clients/client-edit/client-edit.component')
               .then(m => m.ClientEditComponent),
           },
+          {
+  path: ':id',
+  loadComponent: () => import('./pages/clients/client-detail/client-detail.component')
+    .then(m => m.ClientDetailComponent),
+}
         ],
       },
 
       // ══════════════════════════════════════════════════════
       // 👷 MODULE EMPLOYÉS
       // ══════════════════════════════════════════════════════
-      {
-        path: 'employes',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('./pages/employes/employe-list/employe-list.component')
-              .then(m => m.EmployeListComponent),
-          },
-          {
-            path: 'create',
-            loadComponent: () => import('./pages/employes/employe-create/employe-create.component')
-              .then(m => m.EmployeCreateComponent),
-          },
-          {
-            path: 'edit/:id',
-            loadComponent: () => import('./pages/employes/employe-edit/employe-edit.component')
-              .then(m => m.EmployeEditComponent),
-          },
-        ],
-      },
+     {
+  path: 'employes',
+  children: [
+    {
+      path: '',
+      loadComponent: () => import('./pages/employes/employe-list/employe-list.component')
+        .then(m => m.EmployeListComponent),
+    },
+    {
+      path: 'create',
+      loadComponent: () => import('./pages/employes/employe-create/employe-create.component')
+        .then(m => m.EmployeCreateComponent),
+    },
+    {
+      path: ':id',  // ← NOUVELLE ROUTE
+      loadComponent: () => import('./pages/employes/employe-detail/employe-detail.component')
+        .then(m => m.EmployeDetailComponent),
+    },
+    {
+      path: 'edit/:id',
+      loadComponent: () => import('./pages/employes/employe-edit/employe-edit.component')
+        .then(m => m.EmployeEditComponent),
+    },
+  ],
+},
 
       // ══════════════════════════════════════════════════════
       // 🚚 MODULE LIVREURS
@@ -109,36 +120,42 @@ export const routes: Routes = [
               .then(m => m.LivreurCreateComponent),
           },
           {
-            path: 'edit/:id',
+            path: ':id/edit',
             loadComponent: () => import('./pages/livreurs/livreur-edit/livreur-edit.component')
               .then(m => m.LivreurEditComponent),
           },
+          { path: ':id', loadComponent: () => import('./pages/livreurs/livreur-detail/livreur-detail.component').then(m => m.LivreurDetailComponent) },
         ],
       },
 
-      // ══════════════════════════════════════════════════════
-      // 📦 MODULE PRODUITS
-      // ══════════════════════════════════════════════════════
-      {
-        path: 'produits',
-        children: [
-          {
-            path: '',
-            loadComponent: () => import('./pages/produits/produit-list/produit-list.component')
-              .then(m => m.ProduitListComponent),
-          },
-          {
-            path: 'create',
-            loadComponent: () => import('./pages/produits/produit-create/produit-create.component')
-              .then(m => m.ProduitCreateComponent),
-          },
-          {
-            path: 'edit/:id',
-            loadComponent: () => import('./pages/produits/produit-edit/produit-edit.component')
-              .then(m => m.ProduitEditComponent),
-          },
-        ],
-      },
+      // src/app/app.routes.ts
+
+{
+  path: 'produits',
+  children: [
+    {
+      path: '',
+      loadComponent: () => import('./pages/produits/produit-list/produit-list.component')
+        .then(m => m.ProduitListComponent),
+    },
+    {
+      path: 'create',
+      loadComponent: () => import('./pages/produits/produit-create/produit-create.component')
+        .then(m => m.ProduitCreateComponent),
+    },
+    {
+      path: 'edit/:id',
+      loadComponent: () => import('./pages/produits/produit-edit/produit-edit.component')
+        .then(m => m.ProduitEditComponent),
+    },
+    // ✅ AJOUTER CETTE ROUTE (APRÈS edit/:id mais AVANT :id si tu veux)
+    {
+      path: ':id',
+      loadComponent: () => import('./pages/produits/produit-detail/produit-detail.component')
+        .then(m => m.ProduitDetailComponent),
+    },
+  ],
+},
 
       // ══════════════════════════════════════════════════════
       // 📦 MODULE COMMANDES
@@ -183,6 +200,35 @@ export const routes: Routes = [
           },
         ],
       },
+
+      // Dans src/app/app.routes.ts
+// Après le module commandes
+
+{
+  path: 'depenses',
+  children: [
+    {
+      path: '',
+      loadComponent: () => import('./pages/depenses/depense-list/depense-list.component')
+        .then(m => m.DepenseListComponent),
+    },
+    {
+      path: 'create',
+      loadComponent: () => import('./pages/depenses/depense-create/depense-create.component')
+        .then(m => m.DepenseCreateComponent),
+    },
+    {
+      path: 'edit/:id',
+      loadComponent: () => import('./pages/depenses/depense-edit/depense-edit.component')
+        .then(m => m.DepenseEditComponent),
+    },
+    {
+      path: ':id',
+      loadComponent: () => import('./pages/depenses/depense-detail/depense-detail.component')
+        .then(m => m.DepenseDetailComponent),
+    },
+  ],
+},
 
       // ── À ajouter au fur et à mesure ─────────────────────
       // { path: 'boutiques',  loadComponent: () => import('./pages/boutiques/boutiques.component').then(m => m.BoutiquesComponent)  },

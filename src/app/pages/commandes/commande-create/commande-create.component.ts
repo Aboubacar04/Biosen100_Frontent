@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
 import { CommandeService, CreateCommandePayload } from '../../../core/services/commande.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { BoutiqueService } from '../../../core/services/boutique.service';
@@ -22,10 +23,16 @@ interface ProduitPanier {
 @Component({
   selector: 'app-commande-create',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule,FormsModule],
+  imports: [CommonModule, ReactiveFormsModule, FormsModule],
   templateUrl: './commande-create.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush, // ✅ PERFORMANCE BOOST
 })
-export class CommandeCreateComponent implements OnInit {
+export class CommandeCreateComponent implements OnInit, OnDestroy {
+  // ✅ PERFORMANCE: Cleanup automatique des subscriptions
+  private destroy$ = new Subject<void>();
+  private clientSearchSubject$ = new Subject<string>();
+  private produitSearchSubject$ = new Subject<string>();
+
   form!: FormGroup;
   loading = false;
   successMessage = '';
@@ -63,14 +70,49 @@ export class CommandeCreateComponent implements OnInit {
     private livreurService: LivreurService,
     private authService: AuthService,
     private boutiqueService: BoutiqueService,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef // ✅ PERFORMANCE: Change detection manuelle
   ) {}
 
   ngOnInit(): void {
     this.initForm();
+    this.setupSearchDebounce(); // ✅ PERFORMANCE: Debounced search
     this.loadEmployes();
     this.loadLivreurs();
     this.loadProduits();
+  }
+
+  ngOnDestroy(): void {
+    // ✅ PERFORMANCE: Cleanup pour éviter memory leaks
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // ✅ PERFORMANCE: Setup debounced search (300ms)
+  // ═══════════════════════════════════════════════════════════════
+  private setupSearchDebounce(): void {
+    // Client search avec 300ms debounce
+    this.clientSearchSubject$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(query => {
+        this.performClientSearch(query);
+      });
+
+    // Produit search avec 300ms debounce
+    this.produitSearchSubject$
+      .pipe(
+        debounceTime(300),
+        distinctUntilChanged(),
+        takeUntil(this.destroy$)
+      )
+      .subscribe(query => {
+        this.performProduitFilter(query);
+      });
   }
 
   initForm(): void {
@@ -88,40 +130,50 @@ export class CommandeCreateComponent implements OnInit {
       adresse: [''],
     });
 
-    // Watch type_commande pour livreur obligatoire si livraison
-    this.form.get('type_commande')?.valueChanges.subscribe((type) => {
-      if (type === 'livraison') {
-        this.form.get('livreur_id')?.setValidators(Validators.required);
-      } else {
-        this.form.get('livreur_id')?.clearValidators();
-      }
-      this.form.get('livreur_id')?.updateValueAndValidity();
-    });
+    // Watch type_commande avec cleanup
+    this.form.get('type_commande')?.valueChanges
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((type) => {
+        if (type === 'livraison') {
+          this.form.get('livreur_id')?.setValidators(Validators.required);
+        } else {
+          this.form.get('livreur_id')?.clearValidators();
+        }
+        this.form.get('livreur_id')?.updateValueAndValidity();
+        this.cdr.markForCheck();
+      });
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 🔍 AUTOCOMPLETE CLIENT (tape pour voir suggestions)
+  // 🔍 AUTOCOMPLETE CLIENT (avec debounce optimisé)
   // ─────────────────────────────────────────────────────────────
   onClientInput(): void {
-    const query = this.clientRecherche.trim();
+    this.clientSearchSubject$.next(this.clientRecherche.trim());
+  }
 
+  private performClientSearch(query: string): void {
     if (query.length < 2) {
       this.clientSuggestions = [];
       this.showClientSuggestions = false;
+      this.cdr.markForCheck();
       return;
     }
 
     const boutique = this.boutiqueService.getSelectedBoutique();
 
-    this.clientService.autocomplete(query, boutique?.id).subscribe({
-      next: (clients) => {
-        this.clientSuggestions = clients;
-        this.showClientSuggestions = clients.length > 0;
-      },
-      error: (err) => {
-        console.error('Erreur autocomplete:', err);
-      },
-    });
+    this.clientService.autocomplete(query, boutique?.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (clients) => {
+          this.clientSuggestions = clients;
+          this.showClientSuggestions = clients.length > 0;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Erreur autocomplete:', err);
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   selectClient(client: Client): void {
@@ -131,33 +183,28 @@ export class CommandeCreateComponent implements OnInit {
     this.clientSuggestions = [];
     this.showClientSuggestions = false;
     this.errorMessage = '';
+    this.cdr.markForCheck();
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // 🔍 RECHERCHE CLIENT PAR TÉLÉPHONE (bouton rechercher)
-  // ─────────────────────────────────────────────────────────────
   rechercherClient(): void {
     const telephone = this.clientRecherche.trim();
 
-    // Validation format téléphone : minimum 8 chiffres
     if (!telephone) {
       this.errorMessage = 'Veuillez saisir un numéro de téléphone';
-      setTimeout(() => { this.errorMessage = ''; }, 5000);
+      this.autoHideMessage('error');
       return;
     }
 
-    // Accepte format: +221XXXXXXXXX, 221XXXXXXXXX, ou 77777777 (min 8 chiffres)
     if (!/^\+?\d+$/.test(telephone)) {
       this.errorMessage = 'Le numéro doit contenir uniquement des chiffres (avec ou sans +)';
-      setTimeout(() => { this.errorMessage = ''; }, 5000);
+      this.autoHideMessage('error');
       return;
     }
 
-    // Minimum 8 chiffres (sans compter le +)
     const chiffresOnly = telephone.replace('+', '');
     if (chiffresOnly.length < 8) {
       this.errorMessage = 'Le numéro de téléphone doit contenir au moins 8 chiffres';
-      setTimeout(() => { this.errorMessage = ''; }, 5000);
+      this.autoHideMessage('error');
       return;
     }
 
@@ -166,27 +213,30 @@ export class CommandeCreateComponent implements OnInit {
     this.errorMessage = '';
     this.clientSuggestions = [];
     this.showClientSuggestions = false;
+    this.cdr.markForCheck();
+
     const boutique = this.boutiqueService.getSelectedBoutique();
 
-    this.clientService.searchByPhone(telephone, boutique?.id).subscribe({
-      next: (client) => {
-        this.clientTrouve = client;
-        this.form.patchValue({ client_id: client.id });
-        this.clientLoading = false;
-      },
-      error: (err) => {
-        console.error('Erreur recherche client:', err);
-        this.clientLoading = false;
+    this.clientService.searchByPhone(telephone, boutique?.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (client) => {
+          this.clientTrouve = client;
+          this.form.patchValue({ client_id: client.id });
+          this.clientLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Erreur recherche client:', err);
+          this.clientLoading = false;
 
-        if (err.status === 404) {
-          // Client non trouvé
-          this.errorMessage = '';
-        } else {
-          this.errorMessage = err.error?.message || 'Erreur lors de la recherche';
-          setTimeout(() => { this.errorMessage = ''; }, 5000);
-        }
-      },
-    });
+          if (err.status !== 404) {
+            this.errorMessage = err.error?.message || 'Erreur lors de la recherche';
+            this.autoHideMessage('error');
+          }
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   creerNouveauClient(): void {
@@ -194,13 +244,11 @@ export class CommandeCreateComponent implements OnInit {
 
     const telephone = this.newClientForm.value.telephone.trim();
 
-    // Validation format téléphone (accepte +)
     if (!/^\+?\d+$/.test(telephone)) {
       alert('Le numéro doit contenir uniquement des chiffres (avec ou sans +)');
       return;
     }
 
-    // Minimum 8 chiffres (sans compter le +)
     const chiffresOnly = telephone.replace('+', '');
     if (chiffresOnly.length < 8) {
       alert('Le numéro de téléphone doit contenir au moins 8 chiffres');
@@ -216,60 +264,75 @@ export class CommandeCreateComponent implements OnInit {
       }
     }
 
-    this.clientService.create(payload).subscribe({
-      next: (response) => {
-        this.clientTrouve = response.client;
-        this.form.patchValue({ client_id: response.client.id });
-        this.showClientModal = false;
-        this.newClientForm.reset();
-      },
-      error: (err) => {
-        console.error('Erreur création client:', err);
-        const message = err.error?.errors?.telephone?.[0] || err.error?.message || 'Erreur lors de la création du client';
-        alert(message);
-      },
-    });
+    this.clientService.create(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.clientTrouve = response.client;
+          this.form.patchValue({ client_id: response.client.id });
+          this.showClientModal = false;
+          this.newClientForm.reset();
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Erreur création client:', err);
+          const message = err.error?.errors?.telephone?.[0] || err.error?.message || 'Erreur lors de la création du client';
+          alert(message);
+        },
+      });
   }
 
   retirerClient(): void {
     this.clientTrouve = null;
     this.clientRecherche = '';
     this.form.patchValue({ client_id: null });
+    this.cdr.markForCheck();
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 🛒 GESTION DES PRODUITS
+  // 🛒 GESTION DES PRODUITS (avec debounce optimisé)
   // ─────────────────────────────────────────────────────────────
   loadProduits(): void {
     this.produitsLoading = true;
-    const boutique = this.boutiqueService.getSelectedBoutique();
+    this.cdr.markForCheck();
 
+    const boutique = this.boutiqueService.getSelectedBoutique();
     const filters: any = { actif: true, per_page: 1000 };
     if (boutique) {
       filters.boutique_id = boutique.id;
     }
 
-    this.produitService.getAll(filters).subscribe({
-      next: (response) => {
-        this.tousLesProduits = response.data;
-        this.produitsFiltres = [...this.tousLesProduits];
-        this.produitsLoading = false;
-      },
-      error: (err) => {
-        console.error('Erreur chargement produits:', err);
-        this.produitsLoading = false;
-      },
-    });
+    this.produitService.getAll(filters)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.tousLesProduits = response.data;
+          this.produitsFiltres = [...this.tousLesProduits];
+          this.produitsLoading = false;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Erreur chargement produits:', err);
+          this.produitsLoading = false;
+          this.cdr.markForCheck();
+        },
+      });
   }
 
   filtrerProduits(): void {
-    if (!this.produitRecherche.trim()) {
+    this.produitSearchSubject$.next(this.produitRecherche);
+  }
+
+  private performProduitFilter(query: string): void {
+    if (!query.trim()) {
       this.produitsFiltres = [...this.tousLesProduits];
     } else {
+      const lowerQuery = query.toLowerCase();
       this.produitsFiltres = this.tousLesProduits.filter((p) =>
-        p.nom.toLowerCase().includes(this.produitRecherche.toLowerCase())
+        p.nom.toLowerCase().includes(lowerQuery)
       );
     }
+    this.cdr.markForCheck();
   }
 
   ajouterProduit(produit: Produit): void {
@@ -290,6 +353,7 @@ export class CommandeCreateComponent implements OnInit {
     this.showProduitSelector = false;
     this.produitRecherche = '';
     this.produitsFiltres = [...this.tousLesProduits];
+    this.cdr.markForCheck();
   }
 
   modifierQuantite(item: ProduitPanier, delta: number): void {
@@ -301,11 +365,13 @@ export class CommandeCreateComponent implements OnInit {
       item.sousTotal = item.quantite * parseFloat(item.produit.prix_vente);
       this.calculerTotal();
     }
+    this.cdr.markForCheck();
   }
 
   retirerProduit(item: ProduitPanier): void {
     this.panier = this.panier.filter((p) => p.produit.id !== item.produit.id);
     this.calculerTotal();
+    this.cdr.markForCheck();
   }
 
   calculerTotal(): void {
@@ -317,33 +383,39 @@ export class CommandeCreateComponent implements OnInit {
   // ─────────────────────────────────────────────────────────────
   loadEmployes(): void {
     const boutique = this.boutiqueService.getSelectedBoutique();
-    const filters: any = { actif: true };
+    const filters: any = { actif: true, per_page: 100 };
     if (boutique) {
       filters.boutique_id = boutique.id;
     }
 
-    this.employeService.getAll(filters).subscribe({
-      next: (employes) => {
-        this.employes = employes;
-      },
-      error: (err) => {
-        console.error('Erreur chargement employés:', err);
-      },
-    });
+    this.employeService.getAll(filters)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          this.employes = response.data;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Erreur chargement employés:', err);
+        },
+      });
   }
 
   loadLivreurs(): void {
     const boutique = this.boutiqueService.getSelectedBoutique();
     const boutiqueId = boutique?.id;
 
-    this.livreurService.getDisponibles(boutiqueId).subscribe({
-      next: (livreurs) => {
-        this.livreurs = livreurs;
-      },
-      error: (err) => {
-        console.error('Erreur chargement livreurs:', err);
-      },
-    });
+    this.livreurService.getDisponibles(boutiqueId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (livreurs) => {
+          this.livreurs = livreurs;
+          this.cdr.markForCheck();
+        },
+        error: (err) => {
+          console.error('Erreur chargement livreurs:', err);
+        },
+      });
   }
 
   // ─────────────────────────────────────────────────────────────
@@ -352,13 +424,14 @@ export class CommandeCreateComponent implements OnInit {
   onSubmit(): void {
     if (this.form.invalid || this.panier.length === 0) {
       this.errorMessage = 'Veuillez remplir tous les champs et ajouter au moins un produit.';
-      setTimeout(() => { this.errorMessage = ''; }, 5000);
+      this.autoHideMessage('error');
       return;
     }
 
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.cdr.markForCheck();
 
     const payload: CreateCommandePayload = {
       ...this.form.value,
@@ -375,25 +448,50 @@ export class CommandeCreateComponent implements OnInit {
       }
     }
 
-    this.commandeService.create(payload).subscribe({
-      next: (response) => {
-        console.log('Commande créée:', response);
-        this.successMessage = 'Commande créée avec succès !';
-        setTimeout(() => {
-          this.router.navigate(['/commandes']);
-        }, 1500);
-      },
-      error: (err) => {
-        console.error('Erreur création commande:', err);
-        this.errorMessage = err.error?.message || 'Erreur lors de la création de la commande';
-        this.loading = false;
-        setTimeout(() => { this.errorMessage = ''; }, 5000);
-      },
-    });
+    this.commandeService.create(payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (response) => {
+          console.log('Commande créée:', response);
+          this.successMessage = 'Commande créée avec succès !';
+          this.cdr.markForCheck();
+          setTimeout(() => {
+            this.router.navigate(['/commandes/today']);
+          }, 1500);
+        },
+        error: (err) => {
+          console.error('Erreur création commande:', err);
+          this.errorMessage = err.error?.message || 'Erreur lors de la création de la commande';
+          this.loading = false;
+          this.autoHideMessage('error');
+          this.cdr.markForCheck();
+        },
+      });
+  }
+
+  // ─────────────────────────────────────────────────────────────
+  // 🛠️ HELPERS
+  // ─────────────────────────────────────────────────────────────
+  private autoHideMessage(type: 'success' | 'error'): void {
+    setTimeout(() => {
+      if (type === 'success') {
+        this.successMessage = '';
+      } else {
+        this.errorMessage = '';
+      }
+      this.cdr.markForCheck();
+    }, 5000);
   }
 
   getImageUrl(image: string | null): string {
     if (!image) return '/assets/default-product.png';
     return `http://localhost:8000/storage/${image}`;
   }
+
+  // ✅ PERFORMANCE: TrackBy functions pour ngFor
+  trackByClientId = (_: number, client: Client) => client.id;
+  trackByEmployeId = (_: number, employe: Employe) => employe.id;
+  trackByLivreurId = (_: number, livreur: Livreur) => livreur.id;
+  trackByProduitId = (_: number, produit: Produit) => produit.id;
+  trackByPanierId = (_: number, item: ProduitPanier) => item.produit.id;
 }

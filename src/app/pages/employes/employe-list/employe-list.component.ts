@@ -1,97 +1,201 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component,
+  OnInit,
+  OnDestroy,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { FormsModule } from '@angular/forms';
-import { EmployeService, Employe } from '../../../core/services/employe.service';
+import { Subject, takeUntil, debounceTime, distinctUntilChanged } from 'rxjs';
+import {
+  EmployeService,
+  Employe,
+  PaginatedEmployes,
+} from '../../../core/services/employe.service';
 import { BoutiqueService } from '../../../core/services/boutique.service';
-
 @Component({
   selector: 'app-employe-list',
   standalone: true,
   imports: [CommonModule, RouterModule, FormsModule],
   templateUrl: './employe-list.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EmployeListComponent implements OnInit {
-  employes: Employe[] = [];
+export class EmployeListComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+  private searchSubject$ = new Subject<string>();
+  boutiqueId: number | null = null;
   loading = false;
-
-  searchQuery = '';
+  employes: Employe[] = [];
+  currentPage = 1;
+  lastPage = 1;
+  total = 0;
+  perPage = 15;
+  from = 0;
+  to = 0;
+  searchTerm = '';
+  filtreActif: boolean | null = null;
   successMessage = '';
   errorMessage = '';
-
   showDeleteModal = false;
   employeToDelete: Employe | null = null;
-  deleteLoading = false;
-
+  loadingDelete = false;
+  showScrollTop = false;
   constructor(
     private employeService: EmployeService,
-    private boutiqueService: BoutiqueService
+    private boutiqueService: BoutiqueService,
+    private cdr: ChangeDetectorRef,
   ) {}
-
   ngOnInit(): void {
-    this.loadEmployes();
+    this.boutiqueService.selectedBoutique$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe((boutique) => {
+        this.boutiqueId = boutique?.id ?? null;
+        this.resetAndLoad();
+      });
+    this.searchSubject$
+      .pipe(debounceTime(400), distinctUntilChanged(), takeUntil(this.destroy$))
+      .subscribe((term) => {
+        this.searchTerm = term;
+        this.resetAndLoad();
+      });
+    window.addEventListener('scroll', this.onScroll.bind(this));
   }
-
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    window.removeEventListener('scroll', this.onScroll.bind(this));
+  }
   loadEmployes(): void {
     this.loading = true;
-
-    const params: any = {};
-    const boutique = this.boutiqueService.getSelectedBoutique();
-    if (boutique) {
-      params.boutique_id = boutique.id;
-    }
-    if (this.searchQuery.trim()) {
-      params.search = this.searchQuery;
-    }
-
-    this.employeService.getAll(params).subscribe({
-      next: (employes) => {
-        this.employes = employes;
+    this.cdr.markForCheck();
+    const filters: any = {
+      boutique_id: this.boutiqueId ?? undefined,
+      actif: this.filtreActif,
+      search: this.searchTerm || undefined,
+      per_page: this.perPage,
+      page: this.currentPage,
+    };
+    this.employeService.getAll(filters).subscribe({
+      next: (r: PaginatedEmployes) => {
+        this.employes = r.data;
+        this.currentPage = r.current_page;
+        this.lastPage = r.last_page;
+        this.total = r.total;
+        this.from = r.from;
+        this.to = r.to;
         this.loading = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Erreur chargement employés:', err);
+        console.error(err);
+        this.errorMessage = 'Erreur chargement';
         this.loading = false;
+        this.cdr.markForCheck();
+        this.autoHideMessage('error');
       },
     });
   }
-
-  onSearchChange(): void {
+  resetAndLoad(): void {
+    this.currentPage = 1;
     this.loadEmployes();
   }
-
-  openDeleteModal(employe: Employe): void {
-    this.employeToDelete = employe;
-    this.showDeleteModal = true;
+  onSearchChange(term: string): void {
+    this.searchSubject$.next(term);
   }
-
+  onFiltreActifChange(value: string): void {
+    this.filtreActif = value === 'all' ? null : value === 'true';
+    this.resetAndLoad();
+  }
+  onPerPageChange(value: number): void {
+    this.perPage = value;
+    this.resetAndLoad();
+  }
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.lastPage && page !== this.currentPage) {
+      this.currentPage = page;
+      this.loadEmployes();
+      this.scrollToTop();
+    }
+  }
+  get pages(): number[] {
+    const delta = 2,
+      range: number[] = [];
+    for (let i = 1; i <= this.lastPage; i++)
+      if (
+        i === 1 ||
+        i === this.lastPage ||
+        (i >= this.currentPage - delta && i <= this.currentPage + delta)
+      )
+        range.push(i);
+    const rangeWithDots: number[] = [];
+    let prev: number | null = null;
+    for (const i of range) {
+      if (prev && i - prev > 1) rangeWithDots.push(-1);
+      rangeWithDots.push(i);
+      prev = i;
+    }
+    return rangeWithDots;
+  }
+  openDeleteModal(e: Employe): void {
+    this.employeToDelete = e;
+    this.showDeleteModal = true;
+    this.cdr.markForCheck();
+  }
+  closeDeleteModal(): void {
+    this.showDeleteModal = false;
+    this.employeToDelete = null;
+    this.cdr.markForCheck();
+  }
   confirmDelete(): void {
     if (!this.employeToDelete) return;
-
-    this.deleteLoading = true;
-    this.errorMessage = '';
-    this.successMessage = '';
-
+    this.loadingDelete = true;
+    this.cdr.markForCheck();
     this.employeService.delete(this.employeToDelete.id).subscribe({
       next: () => {
-        this.successMessage = 'Employé supprimé avec succès !';
-        this.showDeleteModal = false;
-        this.employeToDelete = null;
-        this.deleteLoading = false;
+        this.successMessage = 'Employé supprimé';
+        this.closeDeleteModal();
+        this.loadingDelete = false;
         this.loadEmployes();
-        setTimeout(() => { this.successMessage = ''; }, 3000);
+        this.autoHideMessage('success');
       },
       error: (err) => {
-        console.error('Erreur suppression:', err);
-        this.errorMessage = err.error?.message || 'Erreur lors de la suppression';
-        this.deleteLoading = false;
-        setTimeout(() => { this.errorMessage = ''; }, 5000);
+        console.error(err);
+        this.errorMessage = err.error?.message || 'Erreur suppression';
+        this.loadingDelete = false;
+        this.closeDeleteModal();
+        this.cdr.markForCheck();
+        this.autoHideMessage('error');
       },
     });
   }
-
-  getPhotoUrl(photo: string | null): string {
-    if (!photo) return 'https://via.placeholder.com/100?text=Photo';
-    return `http://localhost:8000/storage/${photo}`;
+  autoHideMessage(type: 'success' | 'error'): void {
+    setTimeout(() => {
+      type === 'success'
+        ? (this.successMessage = '')
+        : (this.errorMessage = '');
+      this.cdr.markForCheck();
+    }, 5000);
+  }
+  onScroll(): void {
+    this.showScrollTop = window.pageYOffset > 300;
+    this.cdr.markForCheck();
+  }
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+  trackById(_: number, item: Employe): number {
+    return item.id;
+  }
+  trackByPage(_: number, page: number): number {
+    return page;
+  }
+  getInitiales(nom: string): string {
+    return nom
+      .split(' ')
+      .map((n) => n.charAt(0).toUpperCase())
+      .slice(0, 2)
+      .join('');
   }
 }

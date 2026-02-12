@@ -2,11 +2,20 @@
   <div class="max-w-6xl mx-auto">
 
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <!-- 🎯 HEADER -->
+    <!-- 🎯 HEADER AVEC BOUTON RETOUR -->
     <!-- ═══════════════════════════════════════════════════════════════ -->
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Nouvelle commande</h1>
-      <p class="text-gray-500 mt-1">Créer une nouvelle commande pour un client</p>
+    <div class="flex items-center gap-4 mb-6">
+      <a
+        routerLink="/commandes"
+        class="p-2 hover:bg-white rounded-lg transition-colors">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Nouvelle commande</h1>
+        <p class="text-gray-500 mt-1">Créer une nouvelle commande pour un client</p>
+      </div>
     </div>
 
     <!-- ✅ SUCCÈS -->
@@ -54,15 +63,31 @@
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-6">
 
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <!-- 🔍 RECHERCHE CLIENT -->
+      <!-- 🔍 RECHERCHE CLIENT AVEC ICÔNE REPOSITIONNÉE -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
-        <h2 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-          <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-          </svg>
-          Client
-        </h2>
+        <!-- ✅ TITRE CLIENT AVEC ICÔNE NOUVEAU À DROITE -->
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+            <svg class="w-5 h-5 text-green-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+            </svg>
+            Client
+          </h2>
+          <!-- ✅ ICÔNE NOUVEAU CLIENT PETITE ET BIEN PLACÉE -->
+          <button
+            type="button"
+            (click)="showClientModal = true"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-green-700
+                   hover:bg-green-50 rounded-lg transition-all
+                   border border-green-300 hover:border-green-400"
+            title="Nouveau client">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/>
+            </svg>
+            <span>Nouveau</span>
+          </button>
+        </div>
 
         @if (!clientTrouve) {
           <div class="space-y-3">
@@ -115,20 +140,9 @@
               }
             </div>
 
-            <div class="flex items-center justify-between">
-              <p class="text-xs text-gray-500">
-                ℹ️ Tapez au moins 2 caractères pour voir les suggestions. Format: <strong>77777777</strong> ou <strong>+221771234567</strong>
-              </p>
-              <button
-                type="button"
-                (click)="showClientModal = true"
-                class="p-2 border-2 border-green-700 text-green-700 rounded-lg hover:bg-green-50 transition-all"
-                title="Nouveau client">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-              </button>
-            </div>
+            <p class="text-xs text-gray-500">
+              ℹ️ Tapez au moins 2 caractères pour voir les suggestions. Format: <strong>77777777</strong> ou <strong>+221771234567</strong>
+            </p>
 
             <p class="text-xs text-gray-400 italic">Laissez vide pour une commande sans client (sur place)</p>
           </div>

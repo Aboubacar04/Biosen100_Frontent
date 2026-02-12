@@ -1,0 +1,212 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Dépenses</h1>
+        <p class="text-gray-500 mt-1">Gérer les dépenses de la boutique</p>
+      </div>
+      <a
+        routerLink="/depenses/create"
+        class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nouvelle dépense
+      </a>
+    </div>
+
+    <!-- ✅ SUCCÈS -->
+    @if (successMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-[#15803D] shadow-md shadow-[#15803D]/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Opération réussie</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ successMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ❌ ERREUR -->
+    @if (errorMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5
+                    rounded-lg bg-red-500 shadow-md shadow-red-500/25">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center shrink-0">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M18 6L6 18M6 6l12 12"
+                stroke="white" stroke-width="2.5"
+                stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-white">Erreur</span>
+            <span class="w-px h-3 bg-white/30"></span>
+            <span class="text-xs text-white/80">{{ errorMessage }}</span>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- FILTRE CATÉGORIE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+      <div class="flex items-center gap-4">
+        <label class="text-sm font-medium text-gray-700 whitespace-nowrap">Catégorie :</label>
+        <select
+          [(ngModel)]="filters.categorie"
+          (ngModelChange)="onFilterChange()"
+          class="flex-1 px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none">
+          <option value="">Toutes les catégories</option>
+          @for (cat of categories; track cat) {
+            <option [value]="cat">{{ cat }}</option>
+          }
+        </select>
+      </div>
+    </div>
+
+    <!-- LISTE CARTES -->
+    @if (loading) {
+      <div class="flex items-center justify-center py-12">
+        <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </div>
+    } @else if (depenses.length === 0) {
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/>
+        </svg>
+        <p class="text-gray-400 text-lg">Aucune dépense trouvée</p>
+      </div>
+    } @else {
+      <!-- GRILLE DE CARTES -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
+        @for (depense of depenses; track trackByDepenseId($index, depense)) {
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg transition-all">
+            <!-- HEADER CARTE -->
+            <div class="flex items-start justify-between mb-4">
+              <span [class]="getCategorieColor(depense.categorie)" class="px-3 py-1 rounded-full text-sm font-semibold">
+                {{ depense.categorie }}
+              </span>
+              <div class="flex items-center gap-2">
+                <a
+                  [routerLink]="['/depenses', depense.id]"
+                  class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/>
+                  </svg>
+                </a>
+                <a
+                  [routerLink]="['/depenses/edit', depense.id]"
+                  class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </a>
+                <button
+                  (click)="openDeleteModal(depense)"
+                  class="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-all">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <!-- MONTANT -->
+            <div class="mb-3">
+              <p class="text-3xl font-bold text-gray-900">{{ depense.montant | number:'1.0-0' }} F</p>
+            </div>
+
+            <!-- DESCRIPTION -->
+            <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ depense.description }}</p>
+
+            <!-- DATE -->
+            <div class="flex items-center gap-2 text-sm text-gray-500">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+              </svg>
+              <span>{{ depense.date_depense | date:'dd/MM/yyyy' }}</span>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- PAGINATION -->
+      @if (pagination && pagination.last_page > 1) {
+        <div class="bg-white rounded-xl shadow-sm border border-gray-200 px-6 py-4 flex items-center justify-between">
+          <p class="text-sm text-gray-600">
+            Affichage de {{ pagination.from }} à {{ pagination.to }} sur {{ pagination.total }} dépenses
+          </p>
+          <div class="flex items-center gap-2">
+            <button
+              (click)="onPageChange(filters.page - 1)"
+              [disabled]="filters.page === 1"
+              class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              Précédent
+            </button>
+            <span class="px-4 py-2 text-sm text-gray-600">
+              Page {{ filters.page }} / {{ pagination.last_page }}
+            </span>
+            <button
+              (click)="onPageChange(filters.page + 1)"
+              [disabled]="filters.page === pagination.last_page"
+              class="px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all">
+              Suivant
+            </button>
+          </div>
+        </div>
+      }
+    }
+
+  </div>
+</div>
+
+<!-- MODAL SUPPRESSION -->
+@if (showDeleteModal && depenseToDelete) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Supprimer la dépense</h3>
+      <p class="text-sm text-gray-600 mb-2">
+        Êtes-vous sûr de vouloir supprimer cette dépense ?
+      </p>
+      <p class="text-sm font-semibold text-gray-900 mb-6">
+        {{ depenseToDelete.montant | number:'1.0-0' }} F - {{ depenseToDelete.categorie }}
+      </p>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showDeleteModal = false"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        <button
+          (click)="confirmDelete()"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+          @if (deleteLoading) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+          }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}

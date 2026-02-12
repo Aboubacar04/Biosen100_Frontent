@@ -216,8 +216,9 @@
         </div>
       }
 
-      <!-- ACTIONS -->
+      <!-- ✅ ACTIONS - MODIFIÉ POUR AFFICHER ANNULER SI EN_COURS OU VALIDEE -->
       @if (commande.statut === 'en_cours') {
+        <!-- SI EN COURS : Valider ET Annuler -->
         <div class="flex items-center gap-4">
           <button
             (click)="ouvrirModalValidation()"
@@ -230,6 +231,18 @@
           <button
             (click)="ouvrirModalAnnulation()"
             class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium flex items-center justify-center gap-2">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            Annuler la commande
+          </button>
+        </div>
+      } @else if (commande.statut === 'validee') {
+        <!-- SI VALIDÉE : Seulement Annuler -->
+        <div class="flex justify-center">
+          <button
+            (click)="ouvrirModalAnnulation()"
+            class="px-8 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all font-medium flex items-center gap-2 shadow-lg">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/>
             </svg>

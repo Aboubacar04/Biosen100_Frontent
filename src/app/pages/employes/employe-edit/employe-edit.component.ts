@@ -1,119 +1,192 @@
-import { Component, OnInit } from '@angular/core';
+import {
+  Component, OnInit, OnDestroy,
+  ChangeDetectionStrategy, ChangeDetectorRef
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router, RouterModule, ActivatedRoute } from '@angular/router';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { EmployeService, Employe } from '../../../core/services/employe.service';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
+import { Subject, takeUntil } from 'rxjs';
+
+import { EmployeService, Employe, UpdateEmployePayload } from '../../../core/services/employe.service';
 
 @Component({
   selector: 'app-employe-edit',
   standalone: true,
-  imports: [CommonModule, RouterModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, RouterModule],
   templateUrl: './employe-edit.component.html',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class EmployeEditComponent implements OnInit {
+export class EmployeEditComponent implements OnInit, OnDestroy {
+  private destroy$ = new Subject<void>();
+
+  // ─── États ────────────────────────────────────────────────
   form!: FormGroup;
-  employe: Employe | null = null;
   loading = false;
   loadingData = false;
   successMessage = '';
   errorMessage = '';
-  photoPreview: string | null = null;
+  employe: Employe | null = null;
+  employeId!: number;
+  showScrollTop = false;
+
+  // ─── Upload photo ─────────────────────────────────────────
   selectedFile: File | null = null;
+  previewUrl: string | null = null;
 
   constructor(
     private fb: FormBuilder,
     private employeService: EmployeService,
+    private route: ActivatedRoute,
     private router: Router,
-    private route: ActivatedRoute
-  ) {
-    this.initForm();
-  }
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
-    const id = this.route.snapshot.paramMap.get('id');
-    if (id) {
-      this.loadEmploye(+id);
-    }
+    this.employeId = +this.route.snapshot.paramMap.get('id')!;
+    this.initForm();
+    this.loadEmploye();
+    window.addEventListener('scroll', this.onScroll.bind(this));
   }
 
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+    window.removeEventListener('scroll', this.onScroll.bind(this));
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // FORMULAIRE
+  // ═══════════════════════════════════════════════════════════
   initForm(): void {
     this.form = this.fb.group({
-      nom: ['', Validators.required],
-      telephone: ['', Validators.required],
+      nom: ['', [Validators.required, Validators.minLength(3)]],
+      telephone: ['', [Validators.required, Validators.minLength(8)]],
       actif: [true],
     });
   }
 
-  loadEmploye(id: number): void {
+  loadEmploye(): void {
     this.loadingData = true;
-    this.employeService.getById(id).subscribe({
-      next: (employe) => {
-        this.employe = employe;
+    this.cdr.markForCheck();
+
+    this.employeService.getById(this.employeId).subscribe({
+      next: (response) => {
+        this.employe = response.employe;
         this.form.patchValue({
-          nom: employe.nom,
-          telephone: employe.telephone,
-          actif: employe.actif,
+          nom: response.employe.nom,
+          telephone: response.employe.telephone,
+          actif: response.employe.actif,
         });
-        if (employe.photo) {
-          this.photoPreview = `http://localhost:8000/storage/${employe.photo}`;
-        }
         this.loadingData = false;
+        this.cdr.markForCheck();
       },
       error: (err) => {
-        console.error('Erreur chargement:', err);
+        console.error('Erreur:', err);
         this.errorMessage = 'Employé introuvable';
         this.loadingData = false;
-        setTimeout(() => { this.errorMessage = ''; }, 5000);
+        this.cdr.markForCheck();
+        this.autoHideMessage('error');
       },
     });
   }
 
-  onFileSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.files && input.files[0]) {
-      this.selectedFile = input.files[0];
+  // ═══════════════════════════════════════════════════════════
+  // UPLOAD PHOTO
+  // ═══════════════════════════════════════════════════════════
+  onFileSelected(event: any): void {
+    const file = event.target.files[0];
+    if (file) {
+      // Validation type
+      if (!file.type.startsWith('image/')) {
+        this.errorMessage = 'Le fichier doit être une image';
+        this.autoHideMessage('error');
+        return;
+      }
 
+      // Validation taille (2MB max)
+      if (file.size > 2 * 1024 * 1024) {
+        this.errorMessage = 'L\'image ne doit pas dépasser 2MB';
+        this.autoHideMessage('error');
+        return;
+      }
+
+      this.selectedFile = file;
+
+      // Prévisualisation
       const reader = new FileReader();
-      reader.onload = (e) => {
-        this.photoPreview = e.target?.result as string;
+      reader.onload = (e: any) => {
+        this.previewUrl = e.target.result;
+        this.cdr.markForCheck();
       };
-      reader.readAsDataURL(this.selectedFile);
+      reader.readAsDataURL(file);
     }
   }
 
-  removePhoto(): void {
+  removeNewPhoto(): void {
     this.selectedFile = null;
-    this.photoPreview = null;
+    this.previewUrl = null;
+    this.cdr.markForCheck();
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // SOUMISSION
+  // ═══════════════════════════════════════════════════════════
   onSubmit(): void {
     if (this.form.invalid || !this.employe) return;
 
     this.loading = true;
     this.errorMessage = '';
     this.successMessage = '';
+    this.cdr.markForCheck();
 
-    const payload: any = {
-      ...this.form.value,
+    const payload: UpdateEmployePayload = {
+      nom: this.form.value.nom,
+      telephone: this.form.value.telephone,
+      actif: this.form.value.actif,
+      photo: this.selectedFile || undefined,
     };
-
-    if (this.selectedFile) {
-      payload.photo = this.selectedFile;
-    }
 
     this.employeService.update(this.employe.id, payload).subscribe({
       next: () => {
         this.successMessage = 'Employé modifié avec succès !';
+        this.cdr.markForCheck();
         setTimeout(() => {
           this.router.navigate(['/employes']);
         }, 1500);
       },
       error: (err) => {
-        console.error('Erreur modification:', err);
+        console.error('Erreur:', err);
         this.errorMessage = err.error?.message || 'Erreur lors de la modification';
         this.loading = false;
-        setTimeout(() => { this.errorMessage = ''; }, 5000);
+        this.cdr.markForCheck();
+        this.autoHideMessage('error');
       },
     });
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // MESSAGES
+  // ═══════════════════════════════════════════════════════════
+  autoHideMessage(type: 'success' | 'error'): void {
+    setTimeout(() => {
+      if (type === 'success') {
+        this.successMessage = '';
+      } else {
+        this.errorMessage = '';
+      }
+      this.cdr.markForCheck();
+    }, 5000);
+  }
+
+  // ═══════════════════════════════════════════════════════════
+  // SCROLL TO TOP
+  // ═══════════════════════════════════════════════════════════
+  onScroll(): void {
+    this.showScrollTop = window.pageYOffset > 300;
+    this.cdr.markForCheck();
+  }
+
+  scrollToTop(): void {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 }

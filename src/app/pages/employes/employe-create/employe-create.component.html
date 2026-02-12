@@ -1,9 +1,19 @@
 <div class="min-h-screen bg-gray-50 p-6">
   <div class="max-w-2xl mx-auto">
 
-    <div class="mb-6">
-      <h1 class="text-3xl font-bold text-gray-900">Nouvel employé</h1>
-      <p class="text-gray-500 mt-1">Ajouter un nouvel employé à la boutique</p>
+    <!-- HEADER AVEC BOUTON RETOUR -->
+    <div class="flex items-center gap-4 mb-6">
+      <a routerLink="/employes"
+         class="p-2 hover:bg-white rounded-lg transition-colors"
+         title="Retour à la liste">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Nouvel employé</h1>
+        <p class="text-gray-500 mt-1">Ajouter un employé à la boutique</p>
+      </div>
     </div>
 
     <!-- ✅ SUCCÈS -->
@@ -48,76 +58,128 @@
       </div>
     }
 
+    <!-- FORMULAIRE -->
     <form [formGroup]="form" (ngSubmit)="onSubmit()" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+      <div class="space-y-6">
 
-      <!-- PHOTO -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Photo</label>
-        @if (photoPreview) {
-          <div class="flex items-center gap-4">
-            <img [src]="photoPreview" alt="Preview" class="w-24 h-24 rounded-full object-cover border-4 border-gray-100" />
-            <button
-              type="button"
-              (click)="removePhoto()"
-              class="px-4 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-all">
-              Retirer la photo
-            </button>
+        <!-- Nom -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Nom complet <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="nom"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#15803D] focus:border-transparent outline-none"
+            placeholder="Mamadou Diallo"
+          />
+          <p class="text-xs text-red-500 mt-1" *ngIf="form.get('nom')?.invalid && form.get('nom')?.touched">
+            Le nom doit contenir au moins 3 caractères
+          </p>
+        </div>
+
+        <!-- Téléphone -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Téléphone <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            formControlName="telephone"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#15803D] focus:border-transparent outline-none"
+            placeholder="221771234567"
+          />
+          <p class="text-xs text-red-500 mt-1" *ngIf="form.get('telephone')?.invalid && form.get('telephone')?.touched">
+            Le téléphone doit contenir au moins 8 caractères
+          </p>
+        </div>
+
+        <!-- Photo -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Photo (optionnelle)
+          </label>
+
+          <!-- Prévisualisation -->
+          <div *ngIf="previewUrl" class="mb-3">
+            <div class="relative inline-block">
+              <img [src]="previewUrl" class="w-32 h-32 rounded-lg object-cover border-2 border-gray-200" />
+              <button
+                type="button"
+                (click)="removePhoto()"
+                class="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full
+                       flex items-center justify-center hover:bg-red-600 transition-colors"
+                title="Supprimer">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
           </div>
-        } @else {
+
+          <!-- Input file -->
           <input
             type="file"
             (change)="onFileSelected($event)"
             accept="image/*"
-            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg
+                   focus:ring-2 focus:ring-[#15803D] outline-none
+                   file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0
+                   file:text-sm file:font-semibold file:bg-[#15803D] file:text-white
+                   hover:file:bg-[#166534] file:cursor-pointer"
           />
-        }
+          <p class="text-xs text-gray-500 mt-1">
+            Formats acceptés: JPEG, PNG • Taille max: 2MB
+          </p>
+        </div>
+
+        <!-- Info disponibilité -->
+        <div class="p-4 bg-blue-50 rounded-lg border border-blue-100">
+          <div class="flex gap-3">
+            <svg class="w-5 h-5 text-blue-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+            <div>
+              <p class="text-sm font-medium text-blue-900">Statut par défaut</p>
+              <p class="text-xs text-blue-700 mt-1">
+                L'employé sera créé comme <strong>actif</strong> par défaut.
+                Vous pourrez modifier ce paramètre plus tard.
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
 
-      <!-- NOM -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Nom complet *</label>
-        <input
-          type="text"
-          formControlName="nom"
-          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none"
-          placeholder="Ex: Cheikh Seck"
-        />
-      </div>
-
-      <!-- TÉLÉPHONE -->
-      <div class="mb-6">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Téléphone *</label>
-        <input
-          type="text"
-          formControlName="telephone"
-          class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-700 focus:border-transparent outline-none"
-          placeholder="Ex: 221771234567"
-        />
-      </div>
-
-      <!-- BOUTONS -->
-      <div class="flex items-center justify-end gap-4 pt-4 border-t border-gray-200">
-        <button
-          type="button"
+      <!-- ACTIONS -->
+      <div class="flex gap-3 mt-8">
+        <a
           routerLink="/employes"
-          class="px-6 py-2.5 border-2 border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-all font-medium">
+          class="flex-1 px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 transition-colors text-center"
+        >
           Annuler
-        </button>
+        </a>
         <button
           type="submit"
           [disabled]="loading || form.invalid"
-          class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2">
-          @if (loading) {
-            <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
-            </svg>
-          }
-          Créer l'employé
+          class="flex-1 px-6 py-3 bg-[#15803D] text-white rounded-lg font-medium hover:bg-[#166534] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {{ loading ? 'Création...' : 'Créer l\'employé' }}
         </button>
       </div>
-
     </form>
 
   </div>
 </div>
+
+<!-- BOUTON SCROLL TO TOP -->
+<button *ngIf="showScrollTop"
+        (click)="scrollToTop()"
+        class="fixed bottom-8 right-8 w-12 h-12 bg-[#15803D] text-white rounded-full
+               shadow-lg hover:bg-[#166534] transition-all hover:scale-110 z-50
+               flex items-center justify-center"
+        title="Retour en haut">
+  <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+  </svg>
+</button>

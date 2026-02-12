@@ -10,11 +10,52 @@ export interface Client {
   id: number;
   nom_complet: string;
   telephone: string;
-  adresse: string;
+  email?: string | null;
+  adresse?: string | null;
+  actif: boolean;
   boutique_id: number;
   created_at: string;
   updated_at: string;
+  boutique?: Boutique;
   commandes_count?: number;
+}
+
+export interface Boutique {
+  id: number;
+  nom: string;
+  adresse: string;
+  telephone: string;
+  logo: string | null;
+  actif: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface CommandeResume {
+  id: number;
+  numero_commande: string;
+  statut: 'en_cours' | 'validee' | 'annulee';
+  total: string;
+  type_commande: 'sur_place' | 'livraison';
+  notes: string | null;
+  date_commande: string;
+  created_at: string;
+}
+
+export interface ClientStatistiques {
+  total_commandes: number;
+  total_depense: number;
+  commande_moyenne: number;
+  derniere_commande: string | null;
+  commandes_validees: number;
+  commandes_en_cours: number;
+  commandes_annulees: number;
+}
+
+export interface ClientDetailResponse {
+  client: Client;
+  statistiques: ClientStatistiques;
+  commandes: CommandeResume[];
 }
 
 export interface PaginatedClients {
@@ -36,14 +77,18 @@ export interface PaginatedClients {
 export interface CreateClientPayload {
   nom_complet: string;
   telephone: string;
+  email?: string;
   adresse?: string;
+  actif?: boolean;
   boutique_id?: number;
 }
 
 export interface UpdateClientPayload {
   nom_complet?: string;
   telephone?: string;
+  email?: string;
   adresse?: string;
+  actif?: boolean;
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -58,16 +103,20 @@ export class ClientService {
 
   // ─────────────────────────────────────────────────────────────
   // 📋 LISTE TOUS LES CLIENTS
-  // GET /api/clients?boutique_id=&search=&per_page=&page=
+  // GET /api/clients?boutique_id=&search=&actif=&per_page=&page=
   // ─────────────────────────────────────────────────────────────
   getAll(filters?: {
     boutique_id?: number;
+    actif?: boolean | null;
     search?: string;
     per_page?: number;
     page?: number;
   }): Observable<PaginatedClients> {
     let params = new HttpParams();
     if (filters?.boutique_id) params = params.set('boutique_id', filters.boutique_id.toString());
+    if (filters?.actif !== null && filters?.actif !== undefined) {
+      params = params.set('actif', filters.actif ? '1' : '0');
+    }
     if (filters?.search) params = params.set('search', filters.search);
     if (filters?.per_page) params = params.set('per_page', filters.per_page.toString());
     if (filters?.page) params = params.set('page', filters.page.toString());
@@ -105,11 +154,11 @@ export class ClientService {
   }
 
   // ─────────────────────────────────────────────────────────────
-  // 👁️ AFFICHER UN CLIENT
+  // 👁️ AFFICHER UN CLIENT AVEC STATS
   // GET /api/clients/{id}
   // ─────────────────────────────────────────────────────────────
-  getById(id: number): Observable<Client> {
-    return this.http.get<Client>(`${this.apiUrl}/${id}`);
+  getById(id: number): Observable<ClientDetailResponse> {
+    return this.http.get<ClientDetailResponse>(`${this.apiUrl}/${id}`);
   }
 
   // ─────────────────────────────────────────────────────────────

@@ -83,6 +83,10 @@ export class ProduitService {
   // 📋 LISTE TOUS LES PRODUITS
   // GET /api/produits?boutique_id=&categorie_id=&actif=&per_page=&page=&search=
   // ─────────────────────────────────────────────────────────────
+  // ─────────────────────────────────────────────────────────────
+  // 📋 LISTE TOUS LES PRODUITS
+  // GET /api/produits?boutique_id=&categorie_id=&actif=&per_page=&page=&search=
+  // ─────────────────────────────────────────────────────────────
   getAll(filters?: {
     boutique_id?: number;
     categorie_id?: number;
@@ -92,12 +96,31 @@ export class ProduitService {
     search?: string;
   }): Observable<PaginatedProduits> {
     let params = new HttpParams();
-    if (filters?.boutique_id) params = params.set('boutique_id', filters.boutique_id.toString());
-    if (filters?.categorie_id) params = params.set('categorie_id', filters.categorie_id.toString());
-    if (filters?.actif !== undefined) params = params.set('actif', filters.actif ? '1' : '0');
-    if (filters?.per_page) params = params.set('per_page', filters.per_page.toString());
-    if (filters?.page) params = params.set('page', filters.page.toString());
-    if (filters?.search) params = params.set('search', filters.search);
+
+    if (filters?.boutique_id) {
+      params = params.set('boutique_id', filters.boutique_id.toString());
+    }
+
+    if (filters?.categorie_id) {
+      params = params.set('categorie_id', filters.categorie_id.toString());
+    }
+
+    // ✅ CORRECTION : N'ajouter actif QUE si défini (pas null, pas undefined)
+    if (filters?.actif !== null && filters?.actif !== undefined) {
+      params = params.set('actif', filters.actif ? '1' : '0');
+    }
+
+    if (filters?.per_page) {
+      params = params.set('per_page', filters.per_page.toString());
+    }
+
+    if (filters?.page) {
+      params = params.set('page', filters.page.toString());
+    }
+
+    if (filters?.search) {
+      params = params.set('search', filters.search);
+    }
 
     return this.http.get<PaginatedProduits>(this.apiUrl, { params });
   }
