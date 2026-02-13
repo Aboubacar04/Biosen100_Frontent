@@ -1,0 +1,204 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Boutiques</h1>
+        <p class="text-gray-500 mt-1">Gérer toutes les boutiques</p>
+      </div>
+      <a
+        routerLink="/boutiques/create"
+        class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+        </svg>
+        Nouvelle boutique
+      </a>
+    </div>
+
+    <!-- MESSAGES -->
+    @if (successMessage) {
+      <div class="flex justify-center mb-6">
+        <div class="inline-flex items-center gap-3 pl-3 pr-5 py-2.5 rounded-lg bg-[#15803D] shadow-md">
+          <div class="w-7 h-7 bg-white/20 rounded-md flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M20 6L9 17l-5-5" stroke="white" stroke-width="2.5" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <span class="text-xs text-white">{{ successMessage }}</span>
+        </div>
+      </div>
+    }
+
+    <!-- RECHERCHE -->
+    <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-4 mb-6">
+      <div class="flex items-center gap-2">
+        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+        </svg>
+        <input
+          type="text"
+          [(ngModel)]="searchQuery"
+          (ngModelChange)="onSearchChange($event)"
+          placeholder="Rechercher une boutique..."
+          class="flex-1 px-4 py-2 border-0 focus:ring-0 outline-none"
+        />
+      </div>
+    </div>
+
+    <!-- LISTE CARTES -->
+    @if (loading) {
+      <div class="flex items-center justify-center py-12">
+        <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </div>
+    } @else if (boutiquesFiltered.length === 0) {
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-12 text-center">
+        <svg class="w-16 h-16 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+        </svg>
+        <p class="text-gray-400 text-lg">Aucune boutique trouvée</p>
+      </div>
+    } @else {
+      <!-- GRILLE -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        @for (boutique of boutiquesFiltered; track trackByBoutiqueId($index, boutique)) {
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-lg transition-all">
+
+            <!-- LOGO -->
+            <div class="h-40 bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center relative">
+              @if (boutique.logo) {
+                <img [src]="getLogoUrl(boutique.logo)" [alt]="boutique.nom" class="w-full h-full object-cover">
+              } @else {
+                <div class="text-white">
+                  <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                  </svg>
+                </div>
+              }
+              <!-- BADGE STATUT -->
+              <div class="absolute top-3 right-3">
+                <span
+                  class="px-3 py-1 rounded-full text-xs font-bold"
+                  [class.bg-green-500]="boutique.actif"
+                  [class.text-white]="boutique.actif"
+                  [class.bg-gray-400]="!boutique.actif"
+                  [class.text-white]="!boutique.actif">
+                  {{ boutique.actif ? 'Active' : 'Inactive' }}
+                </span>
+              </div>
+            </div>
+
+            <!-- CONTENU -->
+            <div class="p-6">
+              <h3 class="text-xl font-bold text-gray-900 mb-2">{{ boutique.nom }}</h3>
+
+              <!-- INFOS -->
+              <div class="space-y-2 mb-4 text-sm text-gray-600">
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                  </svg>
+                  <span class="truncate">{{ boutique.adresse }}</span>
+                </div>
+                <div class="flex items-center gap-2">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                  </svg>
+                  <span>{{ boutique.telephone }}</span>
+                </div>
+              </div>
+
+              <!-- STATS -->
+              <div class="grid grid-cols-3 gap-2 mb-4">
+                <div class="text-center p-2 bg-blue-50 rounded-lg">
+                  <div class="text-lg font-bold text-blue-700">{{ boutique.produits_count || 0 }}</div>
+                  <div class="text-xs text-blue-600">Produits</div>
+                </div>
+                <div class="text-center p-2 bg-green-50 rounded-lg">
+                  <div class="text-lg font-bold text-green-700">{{ boutique.commandes_count || 0 }}</div>
+                  <div class="text-xs text-green-600">Commandes</div>
+                </div>
+                <div class="text-center p-2 bg-purple-50 rounded-lg">
+                  <div class="text-lg font-bold text-purple-700">{{ boutique.employes_count || 0 }}</div>
+                  <div class="text-xs text-purple-600">Employés</div>
+                </div>
+              </div>
+
+              <!-- ACTIONS -->
+              <div class="flex items-center gap-2">
+                <a
+                  [routerLink]="['/boutiques', boutique.id]"
+                  class="flex-1 px-4 py-2 text-center bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all text-sm font-medium">
+                  Voir
+                </a>
+                <a
+                  [routerLink]="['/boutiques/edit', boutique.id]"
+                  class="flex-1 px-4 py-2 text-center bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm font-medium">
+                  Modifier
+                </a>
+                <button
+                  (click)="toggleStatus(boutique)"
+                  class="px-4 py-2 rounded-lg text-sm font-medium transition-all"
+                  [class.bg-orange-100]="boutique.actif"
+                  [class.text-orange-700]="boutique.actif"
+                  [class.hover:bg-orange-200]="boutique.actif"
+                  [class.bg-green-100]="!boutique.actif"
+                  [class.text-green-700]="!boutique.actif"
+                  [class.hover:bg-green-200]="!boutique.actif">
+                  {{ boutique.actif ? 'Désactiver' : 'Activer' }}
+                </button>
+                <button
+                  (click)="openDeleteModal(boutique)"
+                  class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm font-medium">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+
+  </div>
+</div>
+
+<!-- MODAL SUPPRESSION -->
+@if (showDeleteModal && boutiqueToDelete) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Supprimer la boutique</h3>
+      <p class="text-sm text-gray-600 mb-6">
+        Êtes-vous sûr de vouloir supprimer <strong>{{ boutiqueToDelete.nom }}</strong> ?
+        Cette action est irréversible.
+      </p>
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showDeleteModal = false"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        <button
+          (click)="confirmDelete()"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+          @if (deleteLoading) {
+            <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+            </svg>
+          }
+          Supprimer
+        </button>
+      </div>
+    </div>
+  </div>
+}

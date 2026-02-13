@@ -33,6 +33,7 @@ export class CommandeListComponent implements OnInit, OnDestroy {
   };
 
   searchQuery = '';
+  selectedDate = '';
   successMessage = '';
   errorMessage = '';
 
@@ -77,12 +78,19 @@ export class CommandeListComponent implements OnInit, OnDestroy {
     this.loading = true;
     this.cdr.markForCheck();
 
+    const params: any = {
+      boutique_id: this.boutiqueId || undefined,
+      per_page: this.filters.per_page,
+      page: this.filters.page
+    };
+
+    // Ajouter le filtre date si sélectionné
+    if (this.selectedDate) {
+      params.date = this.selectedDate;
+    }
+
     if (this.filters.search) {
-      this.commandeService.search(this.filters.search, {
-        boutique_id: this.boutiqueId || undefined,
-        per_page: this.filters.per_page,
-        page: this.filters.page
-      }).subscribe({
+      this.commandeService.search(this.filters.search, params).subscribe({
         next: (response: PaginatedCommandes) => {
           this.commandes = response.data;
           this.pagination = response;
@@ -98,11 +106,7 @@ export class CommandeListComponent implements OnInit, OnDestroy {
         },
       });
     } else {
-      this.commandeService.getAll({
-        boutique_id: this.boutiqueId || undefined,
-        per_page: this.filters.per_page,
-        page: this.filters.page
-      }).subscribe({
+      this.commandeService.getAll(params).subscribe({
         next: (response: PaginatedCommandes) => {
           this.commandes = response.data;
           this.pagination = response;
@@ -122,6 +126,19 @@ export class CommandeListComponent implements OnInit, OnDestroy {
 
   onSearchChange(): void {
     this.searchSubject$.next(this.searchQuery);
+  }
+
+  onDateChange(): void {
+    this.filters.page = 1;
+    this.loadCommandes();
+  }
+
+  resetFilters(): void {
+    this.searchQuery = '';
+    this.selectedDate = '';
+    this.filters.search = '';
+    this.filters.page = 1;
+    this.loadCommandes();
   }
 
   onPageChange(page: number): void {

@@ -28,6 +28,7 @@ export class SidebarComponent implements OnInit {
     { route: '/employes',   label: 'Employés',          icon: 'employes'   },
     { route: '/livreurs',   label: 'Livreurs',          icon: 'livreurs'   },
     { route: '/depenses',   label: 'Dépenses',          icon: 'depenses'   },
+    { route: '/factures',   label: 'Factures',          icon: 'factures'   },
     { route: '/boutiques',  label: 'Boutiques',         icon: 'boutiques',  adminOnly: true },
     { route: '/users',      label: 'Utilisateurs',      icon: 'users',      adminOnly: true },
   ];

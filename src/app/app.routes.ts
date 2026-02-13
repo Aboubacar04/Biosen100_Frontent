@@ -230,11 +230,78 @@ export const routes: Routes = [
   ],
 },
 
-      // ── À ajouter au fur et à mesure ─────────────────────
-      // { path: 'boutiques',  loadComponent: () => import('./pages/boutiques/boutiques.component').then(m => m.BoutiquesComponent)  },
-      // { path: 'categories', loadComponent: () => import('./pages/categories/categories.component').then(m => m.CategoriesComponent) },
-      // { path: 'factures',   loadComponent: () => import('./pages/factures/factures.component').then(m => m.FacturesComponent)    },
-      // { path: 'depenses',   loadComponent: () => import('./pages/depenses/depenses.component').then(m => m.DepensesComponent)    },
+// Dans src/app/app.routes.ts
+// Après le module depenses
+
+{
+  path: 'categories',
+  children: [
+    {
+      path: '',
+      loadComponent: () => import('./pages/categories/categorie-list/categorie-list.component')
+        .then(m => m.CategorieListComponent),
+    },
+    {
+      path: 'create',
+      loadComponent: () => import('./pages/categories/categorie-create/categorie-create.component')
+        .then(m => m.CategorieCreateComponent),
+    },
+    {
+      path: 'edit/:id',
+      loadComponent: () => import('./pages/categories/categorie-edit/categorie-edit.component')
+        .then(m => m.CategorieEditComponent),
+    },
+    {
+      path: ':id',
+      loadComponent: () => import('./pages/categories/categorie-detail/categorie-detail.component')
+        .then(m => m.CategorieDetailComponent),
+    },
+  ],
+},
+{
+  path: 'boutiques',
+  children: [
+    {
+      path: '',
+      loadComponent: () => import('./pages/boutiques/boutique-list/boutique-list.component')
+        .then(m => m.BoutiqueListComponent),
+    },
+    {
+      path: 'create',
+      loadComponent: () => import('./pages/boutiques/boutique-create/boutique-create.component')
+        .then(m => m.BoutiqueCreateComponent),
+    },
+    {
+      path: 'edit/:id',
+      loadComponent: () => import('./pages/boutiques/boutique-edit/boutique-edit.component')
+        .then(m => m.BoutiqueEditComponent),
+    },
+    {
+      path: ':id',
+      loadComponent: () => import('./pages/boutiques/boutique-detail/boutique-detail.component')
+        .then(m => m.BoutiqueDetailComponent),
+    },
+  ],
+},
+
+      // ══════════════════════════════════════════════════════
+// 🧾 MODULE FACTURES
+// ══════════════════════════════════════════════════════
+{
+  path: 'factures',
+  children: [
+    {
+      path: '',
+      loadComponent: () => import('./pages/factures/facture-list/facture-list.component')
+        .then(m => m.FactureListComponent),
+    },
+    {
+      path: ':id',
+      loadComponent: () => import('./pages/factures/facture-detail/facture-detail.component')
+        .then(m => m.FactureDetailComponent),
+    },
+  ],
+},
     ],
   },
 

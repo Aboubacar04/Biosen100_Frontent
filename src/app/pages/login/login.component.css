@@ -1,0 +1,27 @@
+/* ── Login Component Styles ── */
+
+/* Input focus ring animation */
+input:focus {
+  border-color: rgba(21, 128, 61, 0.40) !important;
+  background: #ffffff !important;
+  box-shadow: 0 0 0 4px rgba(21, 128, 61, 0.06) !important;
+}
+
+/* Button hover glow */
+button[type="submit"]:not(:disabled):hover {
+  box-shadow: 0 8px 30px rgba(21, 128, 61, 0.35), 0 4px 10px rgba(21, 128, 61, 0.20) !important;
+  transform: translateY(-1px);
+}
+
+/* Smooth scroll for small screens */
+.overflow-y-auto {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(21, 128, 61, 0.10) transparent;
+}
+.overflow-y-auto::-webkit-scrollbar {
+  width: 4px;
+}
+.overflow-y-auto::-webkit-scrollbar-thumb {
+  background: rgba(21, 128, 61, 0.10);
+  border-radius: 10px;
+}

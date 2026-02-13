@@ -1,15 +1,15 @@
 <!-- ═══ LOADING ══════════════════════════════════════════════ -->
 <div *ngIf="loadingPriority"
      class="flex flex-col items-center justify-center min-h-[70vh] gap-4">
-  <div class="w-12 h-12 rounded-full border-4 border-[#15803D] border-t-transparent animate-spin"></div>
-  <p class="text-sm text-gray-400">Chargement du tableau de bord...</p>
+  <div class="w-11 h-11 rounded-full border-[3px] border-[#15803D] border-t-transparent animate-spin"></div>
+  <p class="text-sm text-gray-400 font-medium">Chargement du tableau de bord...</p>
 </div>
 
 <!-- ═══ DASHBOARD ═════════════════════════════════════════════ -->
-<div *ngIf="!loadingPriority" class="space-y-10 pb-10">
+<div *ngIf="!loadingPriority" class="space-y-8 pb-10">
 
   <!-- ─── EN-TÊTE ──────────────────────────────────────────── -->
-  <div class="flex items-center justify-between">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h1 class="text-2xl font-black text-gray-800 tracking-tight">Tableau de bord</h1>
       <p class="text-sm text-gray-400 mt-0.5">
@@ -17,8 +17,9 @@
       </p>
     </div>
     <button (click)="loadPriority()"
-            class="flex items-center gap-2 px-4 py-2 bg-[#15803D] text-white
-                   rounded-xl text-sm font-semibold hover:bg-[#166534] transition-colors shadow-sm">
+            class="flex items-center gap-2 px-5 py-2.5 bg-[#15803D] text-white
+                   rounded-xl text-sm font-bold hover:bg-[#166534] transition-all duration-200
+                   shadow-sm hover:shadow-md active:scale-[0.97] self-start sm:self-auto">
       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
         <path stroke-linecap="round" stroke-linejoin="round"
               d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003
@@ -29,23 +30,23 @@
   </div>
 
   <!-- ════════════════════════════════════════════════════════ -->
-  <!-- SECTION 1 — AUJOURD'HUI : texte narratif + 5 cartes ───── -->
+  <!-- SECTION 1 — AUJOURD'HUI ─────────────────────────────── -->
   <!-- ════════════════════════════════════════════════════════ -->
   <section>
     <div class="flex items-center gap-3 mb-1">
       <span class="w-2.5 h-2.5 rounded-full bg-[#15803D] animate-pulse"></span>
-      <h2 class="text-xs font-black text-[#15803D] uppercase tracking-widest">Aujourd'hui</h2>
-      <div class="flex-1 h-px bg-green-100"></div>
+      <h2 class="text-[11px] font-black text-[#15803D] uppercase tracking-[0.12em]">Aujourd'hui</h2>
+      <div class="flex-1 h-px bg-[#15803D]/10"></div>
     </div>
 
     <!-- Phrase narrative -->
-    <p class="text-sm text-gray-500 mb-5 pl-5">
+    <p class="text-sm text-gray-500 mb-5 pl-5 leading-relaxed">
       <span class="font-bold text-gray-700">Résumé du jour :</span>
       vous avez réalisé <span class="font-black text-[#15803D]">{{ f(stats.jour.ventes) }}</span>
       de ventes pour <span class="font-black text-gray-800">{{ stats.jour.nombre_commandes }} commande(s)</span>,
       avec <span class="font-black text-red-500">{{ f(stats.jour.depenses) }}</span> de dépenses,
       soit un bénéfice net de
-      <span class="font-black" [ngClass]="stats.jour.benefice >= 0 ? 'text-emerald-600' : 'text-red-600'">
+      <span class="font-black" [ngClass]="stats.jour.benefice >= 0 ? 'text-[#15803D]' : 'text-red-600'">
         {{ f(stats.jour.benefice) }}
       </span>.
       <span *ngIf="stats.commandes_en_cours > 0" class="ml-1 text-orange-500 font-bold">
@@ -53,95 +54,101 @@
       </span>
     </p>
 
-    <div class="grid grid-cols-2 lg:grid-cols-5 gap-4">
+    <div class="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
 
-  <!-- Ventes du jour -->
-  <div class="bg-[#15803D] rounded-2xl px-5 py-5 shadow-lg shadow-[#15803D]/30 col-span-1">
-    <div class="flex items-start justify-between mb-3">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Ventes</p>
-        <p class="text-2xl font-black text-white">{{ f(stats.jour.ventes) }}</p>
+      <!-- Ventes du jour -->
+      <div class="rounded-2xl px-4 sm:px-5 py-5 col-span-1 relative overflow-hidden"
+           style="background: linear-gradient(145deg, #15803D 0%, #1a9d4a 100%);
+                  box-shadow: 0 8px 24px rgba(21,128,61,0.25);">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-white/60 mb-1">Ventes</p>
+            <p class="text-xl sm:text-2xl font-black text-white">{{ f(stats.jour.ventes) }}</p>
+          </div>
+          <div class="w-9 h-9 bg-white/15 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
+            </svg>
+          </div>
+        </div>
+        <!-- Deco circle -->
+        <div class="absolute -right-4 -bottom-4 w-20 h-20 rounded-full bg-white/5"></div>
       </div>
-      <div class="w-9 h-9 bg-white/20 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-        </svg>
+
+      <!-- Commandes -->
+      <div class="bg-[#f7faf7] rounded-2xl px-4 sm:px-5 py-5 border border-[#15803D]/6"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Commandes</p>
+            <p class="text-2xl sm:text-3xl font-black text-gray-800">{{ stats.jour.nombre_commandes }}</p>
+          </div>
+          <div class="w-9 h-9 bg-[#15803D]/8 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184
+                       1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
+            </svg>
+          </div>
+        </div>
       </div>
+
+      <!-- Dépenses -->
+      <div class="bg-[#f7faf7] rounded-2xl px-4 sm:px-5 py-5 border border-[#15803D]/6"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Dépenses</p>
+            <p class="text-xl sm:text-2xl font-black text-gray-800">{{ f(stats.jour.depenses) }}</p>
+          </div>
+          <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 17H5m0 0V9m0 8l8-8 4 4 6-6"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bénéfice -->
+      <div class="bg-[#f7faf7] rounded-2xl px-4 sm:px-5 py-5 border border-[#15803D]/6"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Bénéfice</p>
+            <p class="text-xl sm:text-2xl font-black"
+               [ngClass]="stats.jour.benefice >= 0 ? 'text-[#15803D]' : 'text-red-500'">
+              {{ f(stats.jour.benefice) }}
+            </p>
+          </div>
+          <div class="w-9 h-9 bg-[#15803D]/8 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11
+                       0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9
+                       9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Commandes en cours -->
+      <div class="bg-orange-50 rounded-2xl px-4 sm:px-5 py-5 border border-orange-100/80">
+        <div class="flex items-start justify-between mb-2">
+          <div>
+            <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-orange-500 mb-1">En cours</p>
+            <p class="text-2xl sm:text-3xl font-black text-orange-500">{{ stats.commandes_en_cours }}</p>
+            <p class="text-[11px] text-orange-400 mt-1 font-medium">À traiter</p>
+          </div>
+          <div class="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
+            <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+            </svg>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </div>
-
-  <!-- Commandes -->
-  <div class="bg-white rounded-2xl px-5 py-5 shadow-sm border border-gray-100">
-    <div class="flex items-start justify-between mb-3">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Commandes</p>
-        <p class="text-3xl font-black text-gray-800">{{ stats.jour.nombre_commandes }}</p>
-      </div>
-      <div class="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184
-                   1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- Dépenses -->
-  <div class="bg-white rounded-2xl px-5 py-5 shadow-sm border border-gray-100">
-    <div class="flex items-start justify-between mb-3">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Dépenses</p>
-        <p class="text-2xl font-black text-gray-800">{{ f(stats.jour.depenses) }}</p>
-      </div>
-      <div class="w-9 h-9 bg-red-50 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M13 17H5m0 0V9m0 8l8-8 4 4 6-6"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- Bénéfice -->
-  <div class="bg-white rounded-2xl px-5 py-5 shadow-sm border border-gray-100">
-    <div class="flex items-start justify-between mb-3">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Bénéfice</p>
-        <p class="text-2xl font-black"
-           [ngClass]="stats.jour.benefice >= 0 ? 'text-emerald-600' : 'text-red-500'">
-          {{ f(stats.jour.benefice) }}
-        </p>
-      </div>
-      <div class="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11
-                   0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9
-                   9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-  <!-- Commandes en cours -->
-  <div class="bg-orange-50 rounded-2xl px-5 py-5 shadow-sm border border-orange-100">
-    <div class="flex items-start justify-between mb-3">
-      <div>
-        <p class="text-xs font-bold uppercase tracking-widest text-orange-500 mb-1">En cours</p>
-        <p class="text-3xl font-black text-orange-500">{{ stats.commandes_en_cours }}</p>
-        <p class="text-xs text-orange-400 mt-1">À traiter</p>
-      </div>
-      <div class="w-9 h-9 bg-orange-100 rounded-xl flex items-center justify-center">
-        <svg class="w-5 h-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-          <path stroke-linecap="round" stroke-linejoin="round"
-                d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-        </svg>
-      </div>
-    </div>
-  </div>
-
-</div>
-
   </section>
 
   <!-- ════════════════════════════════════════════════════════ -->
@@ -149,45 +156,45 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <section>
     <div class="flex items-center gap-3 mb-1">
-      <span class="w-2.5 h-2.5 rounded-full bg-blue-400"></span>
-      <h2 class="text-xs font-black text-blue-500 uppercase tracking-widest">Ce mois</h2>
-      <div class="flex-1 h-px bg-blue-100"></div>
+      <span class="w-2.5 h-2.5 rounded-full bg-[#15803D]/50"></span>
+      <h2 class="text-[11px] font-black text-[#15803D]/70 uppercase tracking-[0.12em]">Ce mois</h2>
+      <div class="flex-1 h-px bg-[#15803D]/8"></div>
     </div>
-    <p class="text-sm text-gray-500 mb-5 pl-5">
+    <p class="text-sm text-gray-500 mb-5 pl-5 leading-relaxed">
       Ce mois, la boutique a généré
       <span class="font-black text-gray-800">{{ f(stats.mois.ventes) }}</span>
       sur <span class="font-black text-gray-800">{{ stats.mois.nombre_commandes }} commandes</span>
       avec <span class="font-black text-gray-800">{{ f(stats.mois.depenses) }}</span> de charges —
       bénéfice net :
-      <span class="font-black" [ngClass]="stats.mois.benefice >= 0 ? 'text-emerald-600' : 'text-red-600'">
+      <span class="font-black" [ngClass]="stats.mois.benefice >= 0 ? 'text-[#15803D]' : 'text-red-600'">
         {{ f(stats.mois.benefice) }}
       </span>.
     </p>
-    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Ventes du mois</p>
-        <p class="text-2xl font-black text-gray-800">{{ f(stats.mois.ventes) }}</p>
-        <span class="inline-block mt-2 px-2.5 py-1 bg-[#15803D]/10 text-[#15803D]
-                     rounded-lg text-xs font-bold">{{ stats.mois.nombre_commandes }} commandes</span>
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Ventes du mois</p>
+        <p class="text-xl sm:text-2xl font-black text-gray-800">{{ f(stats.mois.ventes) }}</p>
+        <span class="inline-block mt-2 px-2.5 py-1 bg-[#15803D]/8 text-[#15803D]
+                     rounded-lg text-[11px] font-bold">{{ stats.mois.nombre_commandes }} commandes</span>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Dépenses du mois</p>
-        <p class="text-2xl font-black text-gray-800">{{ f(stats.mois.depenses) }}</p>
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Dépenses du mois</p>
+        <p class="text-xl sm:text-2xl font-black text-gray-800">{{ f(stats.mois.depenses) }}</p>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Bénéfice du mois</p>
-        <p class="text-2xl font-black" [ngClass]="stats.mois.benefice >= 0 ? 'text-emerald-600' : 'text-red-500'">
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Bénéfice du mois</p>
+        <p class="text-xl sm:text-2xl font-black" [ngClass]="stats.mois.benefice >= 0 ? 'text-[#15803D]' : 'text-red-500'">
           {{ f(stats.mois.benefice) }}
         </p>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-        <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Panier moyen</p>
-        <p class="text-2xl font-black text-gray-800">
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">Panier moyen</p>
+        <p class="text-xl sm:text-2xl font-black text-gray-800">
           {{ stats.mois.nombre_commandes > 0
             ? f(stats.mois.ventes / stats.mois.nombre_commandes)
             : '—' }}
         </p>
-        <p class="text-xs text-gray-400 mt-1">Par commande</p>
+        <p class="text-[11px] text-gray-400 mt-1">Par commande</p>
       </div>
     </div>
   </section>
@@ -197,576 +204,544 @@
   <!-- ════════════════════════════════════════════════════════ -->
   <section>
     <div class="flex items-center gap-3 mb-1">
-      <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
-      <h2 class="text-xs font-black text-purple-500 uppercase tracking-widest">Cette année</h2>
-      <div class="flex-1 h-px bg-purple-100"></div>
+      <span class="w-2.5 h-2.5 rounded-full bg-[#15803D]/30"></span>
+      <h2 class="text-[11px] font-black text-[#15803D]/50 uppercase tracking-[0.12em]">Cette année</h2>
+      <div class="flex-1 h-px bg-[#15803D]/6"></div>
     </div>
-    <p class="text-sm text-gray-500 mb-5 pl-5">
+    <p class="text-sm text-gray-500 mb-5 pl-5 leading-relaxed">
       Depuis le début de l'année, le chiffre d'affaires s'élève à
-      <span class="font-black text-gray-800">{{ f(stats.annee.ventes) }}</span>
-     <!--pour  <span class="font-black text-gray-800">{{ stats.annee.nombre_commandes  }} commandes</span>-->  —
+      <span class="font-black text-gray-800">{{ f(stats.annee.ventes) }}</span> —
       bénéfice cumulé :
-      <span class="font-black" [ngClass]="stats.annee.benefice >= 0 ? 'text-emerald-600' : 'text-red-600'">
+      <span class="font-black" [ngClass]="stats.annee.benefice >= 0 ? 'text-[#15803D]' : 'text-red-600'">
         {{ f(stats.annee.benefice) }}
       </span>.
     </p>
-    <div class="grid grid-cols-3 gap-4">
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-        <div class="w-14 h-14 bg-[#15803D]/10 rounded-2xl flex items-center justify-center shrink-0">
-          <svg class="w-7 h-7 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+      <!-- CA Annuel -->
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6 flex items-center gap-4"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-[#15803D]/8 rounded-2xl flex items-center justify-center shrink-0">
+          <svg class="w-6 sm:w-7 h-6 sm:h-7 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round"
                   d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2
                      2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2
                      2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
           </svg>
         </div>
-        <div>
-          <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">CA Annuel</p>
-          <p class="text-2xl font-black text-gray-800">{{ f(stats.annee.ventes) }}</p>
-        <!-- <p class="text-xs text-gray-400 mt-0.5">{{ stats.annee.nombre_commandes }} commandes</p>-->
+        <div class="min-w-0">
+          <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">CA Annuel</p>
+          <p class="text-xl sm:text-2xl font-black text-gray-800 truncate">{{ f(stats.annee.ventes) }}</p>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-        <div class="w-14 h-14 bg-red-50 rounded-2xl flex items-center justify-center shrink-0">
-          <svg class="w-7 h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <!-- Dépenses -->
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6 flex items-center gap-4"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-red-50 rounded-2xl flex items-center justify-center shrink-0">
+          <svg class="w-6 sm:w-7 h-6 sm:h-7 text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round"
                   d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2
                      2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/>
           </svg>
         </div>
-        <div>
-          <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Dépenses</p>
-          <p class="text-2xl font-black text-gray-800">{{ f(stats.annee.depenses) }}</p>
+        <div class="min-w-0">
+          <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Dépenses</p>
+          <p class="text-xl sm:text-2xl font-black text-gray-800 truncate">{{ f(stats.annee.depenses) }}</p>
         </div>
       </div>
-      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4">
-        <div class="w-14 h-14 bg-purple-50 rounded-2xl flex items-center justify-center shrink-0">
-          <svg class="w-7 h-7 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <!-- Bénéfice -->
+      <div class="bg-[#f7faf7] rounded-2xl p-4 sm:p-5 border border-[#15803D]/6 flex items-center gap-4"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-[#15803D]/8 rounded-2xl flex items-center justify-center shrink-0">
+          <svg class="w-6 sm:w-7 h-6 sm:h-7 text-[#15803D]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round"
                   d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11
                      0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9
                      9 0 11-18 0 9 9 0 0118 0z"/>
           </svg>
         </div>
-        <div>
-          <p class="text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Bénéfice</p>
-          <p class="text-2xl font-black"
-             [ngClass]="stats.annee.benefice >= 0 ? 'text-emerald-600' : 'text-red-500'">
+        <div class="min-w-0">
+          <p class="text-[10px] sm:text-xs font-bold uppercase tracking-widest text-gray-400 mb-1">Bénéfice</p>
+          <p class="text-xl sm:text-2xl font-black truncate"
+             [ngClass]="stats.annee.benefice >= 0 ? 'text-[#15803D]' : 'text-red-500'">
             {{ f(stats.annee.benefice) }}
           </p>
         </div>
       </div>
     </div>
   </section>
-<!-- ═════════════════ GRAPHIQUES COMPACTÉS ALIGNÉS COMPLETS ═════════════════ -->
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
 
-  <!-- ═════ SECTION 4 — ÉVOLUTION 7 JOURS ═════ -->
-  <section class="flex">
-    <div class="flex flex-col w-full rounded-3xl overflow-hidden"
-         style="background: linear-gradient(150deg, #052e16 0%, #14532d 45%, #15803D 100%);">
+  <!-- ═════════════════ GRAPHIQUES ═════════════════ -->
+  <div class="grid grid-cols-1 xl:grid-cols-2 gap-5 items-stretch">
 
-      <!-- HEADER -->
-      <div class="px-6 pt-6 pb-4 flex flex-wrap items-start justify-between gap-4">
-        <div>
-          <div class="flex items-center gap-2 mb-1">
-            <span class="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse"></span>
-            <span class="text-[10px] font-black text-[#4ade80] uppercase tracking-widest">
-              Graphique dynamique
-            </span>
-          </div>
+    <!-- ═════ SECTION 4 — ÉVOLUTION 7 JOURS ═════ -->
+    <section class="flex">
+      <div class="flex flex-col w-full rounded-3xl overflow-hidden"
+           style="background: linear-gradient(150deg, #052e16 0%, #14532d 45%, #15803D 100%);">
 
-          <h2 class="text-2xl font-black text-white leading-tight">
-            Évolution des ventes
-            <span class="text-[#4ade80]">sur 7 jours</span>
-          </h2>
-
-          <!-- TEXTE EXPLICATIF REMIS -->
-          <p class="text-white/50 text-xs mt-1">
-            <span class="font-bold text-white/80">Courbe verte</span> = ventes ·
-            <span class="font-bold text-amber-400/80">Point or 🥇</span> = meilleur jour ·
-            <span class="text-white/50">Barres = commandes</span>
-          </p>
-
-          <!-- Tendance REMISE -->
-          <div class="mt-2 flex items-center gap-2">
-            <span *ngIf="tendanceVentes === 'hausse'"
-                  class="flex items-center gap-1.5 px-2.5 py-1 bg-[#4ade80]/20 text-[#4ade80] rounded-full text-[10px] font-black">
-              ↗ Les ventes sont en hausse
-            </span>
-            <span *ngIf="tendanceVentes === 'baisse'"
-                  class="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/20 text-red-400 rounded-full text-[10px] font-black">
-              ↘ Les ventes sont en baisse
-            </span>
-            <span *ngIf="tendanceVentes === 'stable'"
-                  class="flex items-center gap-1.5 px-2.5 py-1 bg-white/10 text-white/60 rounded-full text-[10px] font-black">
-              → Ventes stables
-            </span>
-          </div>
-        </div>
-
-        <!-- KPIs -->
-        <div class="flex items-center gap-4 text-center">
+        <!-- HEADER -->
+        <div class="px-4 sm:px-6 pt-5 sm:pt-6 pb-4 flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p class="text-[10px] font-bold text-white/40 uppercase">Total</p>
-            <p class="text-2xl font-black text-white">{{ fCourt(totalVentes7j) }}</p>
-          </div>
-          <div class="w-px h-10 bg-white/10"></div>
-          <div>
-            <p class="text-[10px] font-bold text-white/40 uppercase">Cmd</p>
-            <p class="text-2xl font-black text-[#4ade80]">{{ totalCmds7j }}</p>
-          </div>
-          <div *ngIf="meilleurJour" class="w-px h-10 bg-white/10"></div>
-          <div *ngIf="meilleurJour">
-            <p class="text-[10px] font-bold text-white/40 uppercase">🥇 Jour</p>
-            <p class="text-sm font-black text-amber-400">{{ fCourt(meilleurJour.ventes) }}</p>
-            <p class="text-[10px] text-white/40">{{ meilleurJour.date | date:'dd/MM' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- CHART -->
-      <div class="flex-1 px-5" style="min-height:260px; position:relative;">
-        <canvas #evolutionCanvas></canvas>
-      </div>
-
-      <!-- MINI GRID -->
-      <div class="px-5 pb-6 pt-3">
-        <div class="grid grid-cols-7 gap-1.5">
-          <div *ngFor="let item of evolutionVentes; trackBy: trackByIndex"
-               class="relative flex flex-col items-center gap-1 py-2 px-1 rounded-xl text-center"
-               [ngClass]="item.ventes > 0 ? 'bg-white/10' : 'bg-white/5'">
-
-            <!-- Badge 🥇 -->
-            <span *ngIf="meilleurJour && item.date === meilleurJour.date && item.ventes > 0"
-                  class="absolute -top-2 text-[10px] bg-amber-400 text-gray-900 px-1.5 py-0.5 rounded-full font-black">
-              🥇
-            </span>
-
-            <span class="text-[10px] text-white/40 font-bold">
-              {{ item.date | date:'dd/MM' }}
-            </span>
-
-            <span class="text-lg font-black"
-                  [ngClass]="item.nombre_commandes > 0 ? 'text-[#4ade80]' : 'text-white/20'">
-              {{ item.nombre_commandes }}
-            </span>
-
-            <span class="text-[10px] font-black"
-                  [ngClass]="item.ventes > 0 ? 'text-white' : 'text-white/20'">
-              {{ item.ventes > 0 ? fCourt(item.ventes) : '—' }}
-            </span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ═════ SECTION 5 — COMMANDES SEMAINE ═════ -->
-  <section class="flex">
-    <div class="flex flex-col w-full bg-white rounded-3xl shadow-sm border border-gray-100 overflow-hidden">
-
-      <!-- HEADER -->
-      <div class="bg-gray-50/60 px-6 pt-5 pb-4 border-b border-gray-100">
-        <div class="flex justify-between items-start flex-wrap gap-4">
-          <div>
-            <h2 class="text-xl font-black text-gray-800">📊 Commandes de la semaine</h2>
-            <p class="text-xs text-gray-400 mt-1">
-              <span class="font-bold text-[#15803D]">Barres vertes</span> = nombre de commandes ·
-              <span class="font-bold text-amber-500">Ligne orange</span> = ventes
-            </p>
-          </div>
-
-          <div class="flex items-center gap-4 text-center">
-            <div class="bg-[#15803D] rounded-xl px-4 py-2">
-              <p class="text-[10px] text-white/60 uppercase">Cmd</p>
-              <p class="text-2xl font-black text-white">{{ totalCmdsSemaine }}</p>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="w-2 h-2 rounded-full bg-[#4ade80] animate-pulse"></span>
+              <span class="text-[10px] font-black text-[#4ade80] uppercase tracking-widest">
+                Graphique dynamique
+              </span>
             </div>
+
+            <h2 class="text-xl sm:text-2xl font-black text-white leading-tight">
+              Évolution des ventes
+              <span class="text-[#4ade80]">sur 7 jours</span>
+            </h2>
+
+            <p class="text-white/50 text-xs mt-1">
+              <span class="font-bold text-white/80">Courbe verte</span> = ventes ·
+              <span class="font-bold text-amber-400/80">Point or 🥇</span> = meilleur jour ·
+              <span class="text-white/50">Barres = commandes</span>
+            </p>
+
+            <!-- Tendance -->
+            <div class="mt-2 flex items-center gap-2">
+              <span *ngIf="tendanceVentes === 'hausse'"
+                    class="flex items-center gap-1.5 px-2.5 py-1 bg-[#4ade80]/20 text-[#4ade80] rounded-full text-[10px] font-black">
+                ↗ Les ventes sont en hausse
+              </span>
+              <span *ngIf="tendanceVentes === 'baisse'"
+                    class="flex items-center gap-1.5 px-2.5 py-1 bg-red-500/20 text-red-400 rounded-full text-[10px] font-black">
+                ↘ Les ventes sont en baisse
+              </span>
+              <span *ngIf="tendanceVentes === 'stable'"
+                    class="flex items-center gap-1.5 px-2.5 py-1 bg-white/10 text-white/60 rounded-full text-[10px] font-black">
+                → Ventes stables
+              </span>
+            </div>
+          </div>
+
+          <!-- KPIs -->
+          <div class="flex items-center gap-3 sm:gap-4 text-center">
             <div>
-              <p class="text-[10px] text-gray-400 uppercase">Ventes</p>
-              <p class="text-xl font-black text-amber-500">{{ f(totalVentesSemaine) }}</p>
+              <p class="text-[10px] font-bold text-white/40 uppercase">Total</p>
+              <p class="text-xl sm:text-2xl font-black text-white">{{ fCourt(totalVentes7j) }}</p>
+            </div>
+            <div class="w-px h-10 bg-white/10"></div>
+            <div>
+              <p class="text-[10px] font-bold text-white/40 uppercase">Cmd</p>
+              <p class="text-xl sm:text-2xl font-black text-[#4ade80]">{{ totalCmds7j }}</p>
+            </div>
+            <div *ngIf="meilleurJour" class="w-px h-10 bg-white/10"></div>
+            <div *ngIf="meilleurJour">
+              <p class="text-[10px] font-bold text-white/40 uppercase">🥇 Jour</p>
+              <p class="text-sm font-black text-amber-400">{{ fCourt(meilleurJour.ventes) }}</p>
+              <p class="text-[10px] text-white/40">{{ meilleurJour.date | date:'dd/MM' }}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- CHART -->
+        <div class="flex-1 px-3 sm:px-5" style="min-height:240px; position:relative;">
+          <canvas #evolutionCanvas></canvas>
+        </div>
+
+        <!-- MINI GRID -->
+        <div class="px-3 sm:px-5 pb-5 sm:pb-6 pt-3">
+          <div class="grid grid-cols-7 gap-1 sm:gap-1.5">
+            <div *ngFor="let item of evolutionVentes; trackBy: trackByIndex"
+                 class="relative flex flex-col items-center gap-0.5 sm:gap-1 py-2 px-0.5 sm:px-1 rounded-xl text-center"
+                 [ngClass]="item.ventes > 0 ? 'bg-white/10' : 'bg-white/5'">
+
+              <span *ngIf="meilleurJour && item.date === meilleurJour.date && item.ventes > 0"
+                    class="absolute -top-2 text-[9px] sm:text-[10px] bg-amber-400 text-gray-900 px-1 sm:px-1.5 py-0.5 rounded-full font-black">
+                🥇
+              </span>
+
+              <span class="text-[9px] sm:text-[10px] text-white/40 font-bold">
+                {{ item.date | date:'dd/MM' }}
+              </span>
+
+              <span class="text-base sm:text-lg font-black"
+                    [ngClass]="item.nombre_commandes > 0 ? 'text-[#4ade80]' : 'text-white/20'">
+                {{ item.nombre_commandes }}
+              </span>
+
+              <span class="text-[9px] sm:text-[10px] font-black"
+                    [ngClass]="item.ventes > 0 ? 'text-white' : 'text-white/20'">
+                {{ item.ventes > 0 ? fCourt(item.ventes) : '—' }}
+              </span>
             </div>
           </div>
         </div>
       </div>
+    </section>
 
-      <!-- CHART -->
-      <div class="flex-1 px-6" style="min-height:260px; position:relative;">
-        <canvas #semaineCanvas></canvas>
-      </div>
+    <!-- ═════ SECTION 5 — COMMANDES SEMAINE ═════ -->
+    <section class="flex">
+      <div class="flex flex-col w-full bg-[#f7faf7] rounded-3xl border border-[#15803D]/6 overflow-hidden"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
 
-      <!-- MINI GRID -->
-      <div class="px-6 pb-6 pt-3">
-        <div class="grid grid-cols-7 gap-2">
-          <div *ngFor="let c of commandesSemaine; trackBy: trackByIndex"
-               class="rounded-xl border text-center p-2 text-xs"
-               [ngClass]="c.nombre_commandes > 0
-                 ? 'border-[#15803D]/20 bg-[#15803D]/5'
-                 : 'border-gray-100 bg-gray-50 opacity-50'">
+        <!-- HEADER -->
+        <div class="bg-[#15803D]/3 px-4 sm:px-6 pt-5 pb-4 border-b border-[#15803D]/8">
+          <div class="flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h2 class="text-lg sm:text-xl font-black text-gray-800">📊 Commandes de la semaine</h2>
+              <p class="text-xs text-gray-400 mt-1">
+                <span class="font-bold text-[#15803D]">Barres vertes</span> = nombre de commandes ·
+                <span class="font-bold text-amber-500">Ligne orange</span> = ventes
+              </p>
+            </div>
 
-            <p class="font-bold text-gray-600">{{ c.jour }}</p>
-            <p class="text-[10px] text-gray-400 mb-1">{{ c.date | date:'dd/MM' }}</p>
-
-            <p class="text-xl font-black"
-               [ngClass]="c.nombre_commandes > 0 ? 'text-[#15803D]' : 'text-gray-300'">
-              {{ c.nombre_commandes }}
-            </p>
-
-            <p class="text-[10px] font-bold"
-               [ngClass]="c.total_ventes > 0 ? 'text-amber-600' : 'text-gray-300'">
-              {{ c.total_ventes > 0 ? fCourt(c.total_ventes) : '—' }}
-            </p>
+            <div class="flex items-center gap-3 sm:gap-4 text-center">
+              <div class="bg-[#15803D] rounded-xl px-3 sm:px-4 py-2">
+                <p class="text-[10px] text-white/60 uppercase">Cmd</p>
+                <p class="text-xl sm:text-2xl font-black text-white">{{ totalCmdsSemaine }}</p>
+              </div>
+              <div>
+                <p class="text-[10px] text-gray-400 uppercase">Ventes</p>
+                <p class="text-lg sm:text-xl font-black text-amber-500">{{ f(totalVentesSemaine) }}</p>
+              </div>
+            </div>
           </div>
         </div>
+
+        <!-- CHART -->
+        <div class="flex-1 px-3 sm:px-6" style="min-height:240px; position:relative;">
+          <canvas #semaineCanvas></canvas>
+        </div>
+
+        <!-- MINI GRID -->
+        <div class="px-3 sm:px-6 pb-5 sm:pb-6 pt-3">
+          <div class="grid grid-cols-7 gap-1 sm:gap-2">
+            <div *ngFor="let c of commandesSemaine; trackBy: trackByIndex"
+                 class="rounded-xl border text-center p-1.5 sm:p-2 text-xs"
+                 [ngClass]="c.nombre_commandes > 0
+                   ? 'border-[#15803D]/20 bg-[#15803D]/5'
+                   : 'border-gray-100 bg-gray-50 opacity-50'">
+
+              <p class="font-bold text-gray-600 text-[11px] sm:text-xs">{{ c.jour }}</p>
+              <p class="text-[9px] sm:text-[10px] text-gray-400 mb-0.5 sm:mb-1">{{ c.date | date:'dd/MM' }}</p>
+
+              <p class="text-lg sm:text-xl font-black"
+                 [ngClass]="c.nombre_commandes > 0 ? 'text-[#15803D]' : 'text-gray-300'">
+                {{ c.nombre_commandes }}
+              </p>
+
+              <p class="text-[9px] sm:text-[10px] font-bold"
+                 [ngClass]="c.total_ventes > 0 ? 'text-amber-600' : 'text-gray-300'">
+                {{ c.total_ventes > 0 ? fCourt(c.total_ventes) : '—' }}
+              </p>
+            </div>
+          </div>
+        </div>
+
       </div>
+    </section>
 
-    </div>
-  </section>
-
-</div>
-
+  </div>
 
   <!-- ════════════════════════════════════════════════════════ -->
   <!-- SECTION 6 — FILTRES TOPS ───────────────────────────── -->
   <!-- ════════════════════════════════════════════════════════ -->
-<section>
-  <div class="flex items-center gap-3 mb-4">
-    <h2 class="text-xs font-black text-gray-500 uppercase tracking-widest">Classements</h2>
-    <div class="flex-1 h-px bg-gray-100"></div>
-  </div>
+  <section>
+    <div class="flex items-center gap-3 mb-4">
+      <h2 class="text-[11px] font-black text-gray-500 uppercase tracking-[0.12em]">Classements</h2>
+      <div class="flex-1 h-px bg-gray-100"></div>
+    </div>
 
-  <!-- Conteneur principal -->
-  <div class="flex flex-col xl:flex-row xl:items-center gap-6">
+    <div class="flex flex-col xl:flex-row xl:items-center gap-5">
 
-    <!-- 🎯 BLOC FILTRES (taille contenu seulement) -->
-    <div class="bg-white rounded-2xl px-6 py-5 shadow-sm border border-gray-100
-                flex flex-wrap items-center gap-5 w-fit">
+      <!-- BLOC FILTRES -->
+      <div class="bg-[#f7faf7] rounded-2xl px-4 sm:px-6 py-4 sm:py-5 border border-[#15803D]/8
+                  flex flex-wrap items-center gap-4 sm:gap-5 w-fit"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
 
-      <!-- PÉRIODE -->
-      <div class="flex items-center gap-3">
-        <span class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Période</span>
-        <div class="flex gap-2">
-          <button *ngFor="let p of periodes; trackBy: trackByIndex"
-                  (click)="periodeTop = p.value; loadTops()"
-                  class="px-4 py-2 rounded-xl text-xs font-bold border transition-all"
-                  [ngClass]="periodeTop === p.value
-                    ? 'bg-[#15803D] text-white border-[#15803D] shadow-md scale-105'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'">
-            {{ p.label }}
-          </button>
+        <!-- PÉRIODE -->
+        <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+          <span class="text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-widest">Période</span>
+          <div class="flex gap-1.5 sm:gap-2">
+            <button *ngFor="let p of periodes; trackBy: trackByIndex"
+                    (click)="periodeTop = p.value; loadTops()"
+                    class="px-3 sm:px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200"
+                    [ngClass]="periodeTop === p.value
+                      ? 'bg-[#15803D] text-white border-[#15803D] shadow-md'
+                      : 'bg-white text-gray-600 border-[#15803D]/12 hover:bg-[#15803D]/5'">
+              {{ p.label }}
+            </button>
+          </div>
+        </div>
+
+        <div class="w-px h-6 bg-gray-200 hidden sm:block"></div>
+
+        <!-- LIMITE -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <span class="text-[10px] sm:text-[11px] font-black text-gray-400 uppercase tracking-widest">Limite</span>
+          <div class="flex gap-1.5 sm:gap-2">
+            <button *ngFor="let l of limites; trackBy: trackByIndex"
+                    (click)="limiteTop = l; loadTops()"
+                    class="px-3 sm:px-4 py-2 rounded-xl text-xs font-bold border transition-all duration-200"
+                    [ngClass]="limiteTop === l
+                      ? 'bg-[#15803D] text-white border-[#15803D] shadow-md'
+                      : 'bg-white text-gray-600 border-[#15803D]/12 hover:bg-[#15803D]/5'">
+              Top {{ l }}
+            </button>
+          </div>
         </div>
       </div>
 
-      <div class="w-px h-6 bg-gray-200"></div>
-
-      <!-- LIMITE -->
-      <div class="flex items-center gap-3">
-        <span class="text-[11px] font-black text-gray-400 uppercase tracking-widest">Limite</span>
-        <div class="flex gap-2">
-          <button *ngFor="let l of limites; trackBy: trackByIndex"
-                  (click)="limiteTop = l; loadTops()"
-                  class="px-4 py-2 rounded-xl text-xs font-bold border transition-all"
-                  [ngClass]="limiteTop === l
-                    ? 'bg-[#15803D] text-white border-[#15803D] shadow-md scale-105'
-                    : 'bg-gray-50 text-gray-600 border-gray-200 hover:bg-gray-100'">
-            Top {{ l }}
-          </button>
-        </div>
+      <!-- TEXTE EXPLICATIF -->
+      <div class="flex-1 text-sm text-gray-500 leading-relaxed max-w-xl">
+        <span class="font-semibold text-gray-700">Astuce :</span>
+        Ces filtres permettent d'afficher les <span class="font-semibold text-[#15803D]">meilleures performances</span>
+        selon la période choisie (jour, semaine, mois ou année) et le nombre d'éléments du classement.
+        Utilisez-les pour analyser rapidement les <span class="font-semibold">tendances de ventes</span>,
+        les produits les plus populaires ou les meilleurs clients.
       </div>
-
-    </div>
-
-    <!-- 🧠 TEXTE EXPLICATIF À DROITE -->
-    <div class="flex-1 text-sm text-gray-500 leading-relaxed max-w-xl">
-      <span class="font-semibold text-gray-700">Astuce :</span>
-      Ces filtres permettent d’afficher les <span class="font-semibold text-[#15803D]">meilleures performances</span>
-      selon la période choisie (jour, semaine, mois ou année) et le nombre d’éléments du classement.
-      Utilisez-les pour analyser rapidement les <span class="font-semibold">tendances de ventes</span>,
-      les produits les plus populaires ou les meilleurs clients.
-    </div>
-
-  </div>
-</section>
-
-
-  <!-- SKELETON TOPS -->
-  <div *ngIf="loadingSecondary" class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-    <div *ngFor="let i of [1,2,3]" class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100">
-      <div class="h-4 w-28 bg-gray-100 rounded-lg animate-pulse mb-6"></div>
-      <div *ngFor="let j of [1,2,3,4,5]"
-           class="flex items-center gap-3 py-3 border-b border-gray-50">
-        <div class="w-10 h-10 bg-gray-100 rounded-xl animate-pulse shrink-0"></div>
-        <div class="flex-1 space-y-2">
-          <div class="h-3 bg-gray-100 rounded animate-pulse"></div>
-          <div class="h-2 w-2/3 bg-gray-100 rounded animate-pulse"></div>
-        </div>
-        <div class="w-16 h-6 bg-gray-100 rounded-lg animate-pulse"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════════════════════════════════════════════════════════ -->
-  <!-- SECTION 7 — TOPS avec images ──────────────────────── -->
-  <!-- ════════════════════════════════════════════════════════ -->
-  <section *ngIf="!loadingSecondary">
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-      <!-- TOP PRODUITS ──────────────────────────────────────── -->
-     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-  <div class="px-6 py-5 border-b border-gray-50 flex items-center justify-between">
-    <div>
-      <h3 class="text-base font-black text-gray-800 flex items-center gap-2">
-        🏆 Top Produits
-      </h3>
-      <p class="text-xs text-gray-400 mt-1">Meilleurs vendeurs (quantité)</p>
-    </div>
-    <span class="text-xs bg-[#15803D]/10 text-[#15803D] px-3 py-1 rounded-full font-bold">
-      {{ periodeTop }}
-    </span>
-  </div>
-
-  <!-- 🥇 PRODUIT #1 -->
-  <div *ngIf="topProduits[0]" class="p-6 bg-gradient-to-r from-[#15803D] to-emerald-600 text-white">
-    <div class="flex items-center gap-4">
-
-      <!-- Badge numéro -->
-      <div class="w-10 h-10 rounded-full bg-white text-[#15803D] flex items-center justify-center font-black text-lg shadow-md">
-        1
-      </div>
-
-      <div class="w-16 h-16 rounded-2xl overflow-hidden bg-white/20 shrink-0">
-        <img *ngIf="imgUrl(topProduits[0].image)"
-             [src]="STORAGE + topProduits[0].image"
-             class="w-full h-full object-cover">
-      </div>
-
-      <div class="flex-1">
-        <p class="text-xs uppercase tracking-widest text-white/70">Meilleur produit</p>
-        <p class="text-lg font-black">{{ topProduits[0].nom }}</p>
-        <p class="text-sm font-bold text-white/80">{{ f(topProduits[0].total_ventes) }}</p>
-      </div>
-
-      <div class="text-right">
-        <p class="text-3xl font-black">{{ topProduits[0].quantite_vendue }}</p>
-        <p class="text-xs text-white/70">unités</p>
-      </div>
-    </div>
-  </div>
-
-  <!-- 🥈 AUTRES PRODUITS -->
-  <div class="divide-y divide-gray-50">
-    <div *ngFor="let p of topProduits.slice(1); let i = index"
-         class="flex items-center gap-4 px-6 py-4 hover:bg-gray-50 transition">
-
-      <!-- Badge numéro -->
-      <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm"
-           [ngClass]="
-             i === 0 ? 'bg-gray-200 text-gray-700' :
-             i === 1 ? 'bg-amber-100 text-amber-700' :
-             'bg-gray-100 text-gray-500'
-           ">
-        {{ i + 2 }}
-      </div>
-
-      <div class="w-11 h-11 rounded-xl overflow-hidden bg-gray-100 shrink-0">
-        <img *ngIf="imgUrl(p.image)" [src]="STORAGE + p.image" class="w-full h-full object-cover">
-      </div>
-
-      <div class="flex-1">
-        <p class="text-sm font-bold text-gray-800 truncate">{{ p.nom }}</p>
-        <p class="text-xs text-[#15803D] font-bold">{{ f(p.total_ventes) }}</p>
-      </div>
-
-      <div class="text-right">
-        <p class="text-lg font-black text-gray-800">{{ p.quantite_vendue }}</p>
-        <p class="text-xs text-gray-400">u.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-      <!-- TOP EMPLOYÉS ─────────────────────────────────────── -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-  <div class="px-6 py-5 border-b border-gray-50 flex justify-between">
-    <div>
-      <h3 class="text-base font-black text-gray-800 flex items-center gap-2">
-        👷 Top Employés
-      </h3>
-      <p class="text-xs text-gray-400 mt-1">Par chiffre d'affaires</p>
-    </div>
-    <span class="text-xs bg-blue-50 text-blue-600 px-3 py-1 rounded-full font-bold">
-      {{ periodeTop }}
-    </span>
-  </div>
-
-  <div class="p-4 space-y-3">
-
-    <div *ngFor="let e of topEmployes; let i = index"
-         class="flex items-center gap-4 p-3 rounded-xl border transition hover:shadow-sm"
-         [ngClass]="i === 0 ? 'bg-blue-50 border-blue-200' : 'bg-gray-50 border-gray-100'">
-
-      <!-- Badge classement -->
-      <div class="w-10 h-10 rounded-full flex items-center justify-center font-black text-white text-sm"
-           [ngClass]="
-             i === 0 ? 'bg-blue-600' :
-             i === 1 ? 'bg-gray-400' :
-             i === 2 ? 'bg-amber-500' :
-             'bg-gray-300 text-gray-700'
-           ">
-        {{ i + 1 }}
-      </div>
-
-      <!-- Infos -->
-      <div class="flex-1">
-        <p class="text-sm font-bold text-gray-800">{{ e.nom }}</p>
-        <p class="text-xs font-bold text-blue-600">{{ f(e.total_ventes) }}</p>
-      </div>
-
-      <!-- Commandes -->
-      <div class="text-right">
-        <p class="text-lg font-black text-gray-800">{{ e.nombre_commandes }}</p>
-        <p class="text-xs text-gray-400">cmds</p>
-      </div>
-    </div>
-
-  </div>
-</div>
-
-
-      <!-- TOP LIVREURS ─────────────────────────────────────── -->
-      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-  <div class="px-6 py-5 border-b border-gray-50 flex justify-between">
-    <div>
-      <h3 class="text-base font-black text-gray-800 flex items-center gap-2">
-        🚚 Top Livreurs
-      </h3>
-      <p class="text-xs text-gray-400 mt-1">Par montant total livré</p>
-    </div>
-    <span class="text-xs bg-orange-50 text-orange-600 px-3 py-1 rounded-full font-bold">
-      {{ periodeTop }}
-    </span>
-  </div>
-
-  <div class="p-4 space-y-3">
-
-    <div *ngFor="let l of topLivreurs; let i = index"
-         class="flex items-center gap-4 p-3 rounded-xl transition"
-         [ngClass]="i === 0 ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50 border border-gray-100'">
-
-      <!-- Badge carré moderne -->
-      <div class="w-10 h-10 rounded-lg flex items-center justify-center font-black text-sm"
-           [ngClass]="
-             i === 0 ? 'bg-orange-500 text-white' :
-             'bg-orange-100 text-orange-600'
-           ">
-        {{ i + 1 }}
-      </div>
-
-      <!-- Infos -->
-      <div class="flex-1">
-        <p class="text-sm font-bold text-gray-800">{{ l.nom }}</p>
-        <p class="text-xs text-orange-600 font-bold">{{ f(l.total_livraisons) }}</p>
-        <p class="text-xs text-gray-400">📞 {{ l.telephone }}</p>
-      </div>
-
-      <!-- Livraisons -->
-      <div class="text-right">
-        <p class="text-lg font-black text-gray-800">{{ l.nombre_livraisons }}</p>
-        <p class="text-xs text-gray-400">livr.</p>
-      </div>
-    </div>
-
-  </div>
-</div>
-
 
     </div>
   </section>
 
-<!-- ═════════════════ SECTION 8 — STOCK FAIBLE ═════════════════ -->
-<section *ngIf="!loadingSecondary">
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-5">
-
-    <!-- ░░░ CARTE 1 — TABLEAU COMPACT ░░░ -->
-    <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-
-      <!-- Header compact -->
-      <div class="px-5 py-4 border-b border-gray-50 flex items-center justify-between flex-wrap gap-3">
-        <div>
-          <h3 class="text-sm font-black text-gray-800">⚠️ Alertes Stock</h3>
-          <p class="text-xs text-gray-500 mt-0.5">
-            <span class="font-black text-red-500">{{ stockFaible.length }}</span>
-            produit(s) sous le seuil
-          </p>
+  <!-- SKELETON TOPS -->
+  <div *ngIf="loadingSecondary" class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+    <div *ngFor="let i of [1,2,3]" class="bg-[#f7faf7] rounded-2xl p-5 border border-[#15803D]/6">
+      <div class="h-4 w-28 bg-[#15803D]/8 rounded-lg animate-pulse mb-5"></div>
+      <div *ngFor="let j of [1,2,3,4,5]"
+           class="flex items-center gap-3 py-3 border-b border-[#15803D]/5">
+        <div class="w-10 h-10 bg-[#15803D]/8 rounded-xl animate-pulse shrink-0"></div>
+        <div class="flex-1 space-y-2">
+          <div class="h-3 bg-[#15803D]/6 rounded animate-pulse"></div>
+          <div class="h-2 w-2/3 bg-[#15803D]/6 rounded animate-pulse"></div>
         </div>
-        <div class="flex items-center gap-3 text-[11px] font-bold">
-          <span class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-red-500"></span>Rupture
-          </span>
-          <span class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-orange-500"></span>Critique
-          </span>
-          <span class="flex items-center gap-1">
-            <span class="w-2 h-2 rounded-full bg-yellow-400"></span>Faible
-          </span>
-        </div>
-      </div>
-
-      <!-- Tableau plus fin -->
-      <div class="overflow-x-auto">
-        <table class="w-full text-xs">
-          <thead>
-            <tr class="bg-gray-50 text-gray-400 font-black uppercase tracking-widest">
-              <th class="text-left px-5 py-2">Produit</th>
-              <th class="text-right px-5 py-2">Stock</th>
-              <th class="text-center px-5 py-2">Statut</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-gray-50">
-            <tr *ngFor="let p of stockPagine; trackBy: trackById" class="hover:bg-gray-50 transition">
-              <td class="px-5 py-3 font-bold text-gray-700 truncate max-w-[140px]">
-                {{ p.nom }}
-              </td>
-              <td class="px-5 py-3 text-right">
-                <span class="text-lg font-black"
-                      [ngClass]="p.stock <= 0 ? 'text-red-500' : 'text-orange-500'">
-                  {{ p.stock }}
-                </span>
-              </td>
-              <td class="px-5 py-3 text-center">
-                <span class="px-2 py-1 rounded-full text-[10px] font-black"
-                      [ngClass]="stockBadge(p).cls">
-                  {{ stockBadge(p).label }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="w-16 h-6 bg-[#15803D]/8 rounded-lg animate-pulse"></div>
       </div>
     </div>
+  </div>
 
-    <!-- ░░░ CARTE 2 — GRAPHIQUE STOCK ░░░ -->
-    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 flex flex-col">
+  <!-- ════════════════════════════════════════════════════════ -->
+  <!-- SECTION 7 — TOPS ──────────────────────────────────── -->
+  <!-- ════════════════════════════════════════════════════════ -->
+  <section *ngIf="!loadingSecondary">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-      <div class="mb-4">
-        <h3 class="text-sm font-black text-gray-800">📉 Gravité des stocks</h3>
-        <p class="text-xs text-gray-400 mt-1">
-          Visualisation des produits les plus proches de la rupture
+      <!-- TOP PRODUITS ──────────────────────────────────────── -->
+      <div class="bg-[#f7faf7] rounded-2xl border border-[#15803D]/6 overflow-hidden" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-[#15803D]/5 flex items-center justify-between">
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-gray-800 flex items-center gap-2">
+              🏆 Top Produits
+            </h3>
+            <p class="text-[11px] text-gray-400 mt-1">Meilleurs vendeurs (quantité)</p>
+          </div>
+          <span class="text-[10px] sm:text-xs bg-[#15803D]/8 text-[#15803D] px-2.5 sm:px-3 py-1 rounded-full font-bold">
+            {{ periodeTop }}
+          </span>
+        </div>
+
+        <!-- 🥇 PRODUIT #1 -->
+        <div *ngIf="topProduits[0]" class="p-4 sm:p-6"
+             style="background: linear-gradient(135deg, #15803D 0%, #1a9d4a 100%);">
+          <div class="flex items-center gap-3 sm:gap-4">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-white text-[#15803D] flex items-center justify-center font-black text-base sm:text-lg shadow-md shrink-0">
+              1
+            </div>
+            <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl overflow-hidden bg-white/20 shrink-0">
+              <img *ngIf="imgUrl(topProduits[0].image)"
+                   [src]="STORAGE + topProduits[0].image"
+                   class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] uppercase tracking-widest text-white/70">Meilleur produit</p>
+              <p class="text-base sm:text-lg font-black text-white truncate">{{ topProduits[0].nom }}</p>
+              <p class="text-sm font-bold text-white/80">{{ f(topProduits[0].total_ventes) }}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-2xl sm:text-3xl font-black text-white">{{ topProduits[0].quantite_vendue }}</p>
+              <p class="text-[11px] text-white/70">unités</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- AUTRES PRODUITS -->
+        <div class="divide-y divide-[#15803D]/5">
+          <div *ngFor="let p of topProduits.slice(1); let i = index"
+               class="flex items-center gap-3 sm:gap-4 px-5 sm:px-6 py-3 sm:py-4 hover:bg-[#15803D]/3 transition">
+            <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm shrink-0"
+                 [ngClass]="
+                   i === 0 ? 'bg-gray-200 text-gray-700' :
+                   i === 1 ? 'bg-amber-100 text-amber-700' :
+                   'bg-gray-100 text-gray-500'
+                 ">
+              {{ i + 2 }}
+            </div>
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-xl overflow-hidden bg-gray-100 shrink-0">
+              <img *ngIf="imgUrl(p.image)" [src]="STORAGE + p.image" class="w-full h-full object-cover">
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-800 truncate">{{ p.nom }}</p>
+              <p class="text-xs text-[#15803D] font-bold">{{ f(p.total_ventes) }}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-base sm:text-lg font-black text-gray-800">{{ p.quantite_vendue }}</p>
+              <p class="text-[11px] text-gray-400">u.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP EMPLOYÉS ─────────────────────────────────────── -->
+      <div class="bg-[#f7faf7] rounded-2xl border border-[#15803D]/6 overflow-hidden" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-[#15803D]/5 flex justify-between">
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-gray-800 flex items-center gap-2">
+              👷 Top Employés
+            </h3>
+            <p class="text-[11px] text-gray-400 mt-1">Par chiffre d'affaires</p>
+          </div>
+          <span class="text-[10px] sm:text-xs bg-[#15803D]/8 text-[#15803D] px-2.5 sm:px-3 py-1 rounded-full font-bold">
+            {{ periodeTop }}
+          </span>
+        </div>
+
+        <div class="p-3 sm:p-4 space-y-2 sm:space-y-3">
+          <div *ngFor="let e of topEmployes; let i = index"
+               class="flex items-center gap-3 sm:gap-4 p-3 rounded-xl border transition"
+               [ngClass]="i === 0 ? 'bg-[#15803D]/5 border-[#15803D]/15' : 'bg-gray-50 border-gray-100'">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-black text-white text-xs sm:text-sm shrink-0"
+                 [ngClass]="
+                   i === 0 ? 'bg-[#15803D]' :
+                   i === 1 ? 'bg-gray-400' :
+                   i === 2 ? 'bg-amber-500' :
+                   'bg-gray-300 text-gray-700'
+                 ">
+              {{ i + 1 }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-800 truncate">{{ e.nom }}</p>
+              <p class="text-xs text-[#15803D] font-bold">{{ f(e.total_ventes) }}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-base sm:text-lg font-black text-gray-800">{{ e.nombre_commandes }}</p>
+              <p class="text-[11px] text-gray-400">cmds</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TOP LIVREURS ─────────────────────────────────────── -->
+      <div class="bg-[#f7faf7] rounded-2xl border border-[#15803D]/6 overflow-hidden" style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="px-5 sm:px-6 py-4 sm:py-5 border-b border-[#15803D]/5 flex justify-between">
+          <div>
+            <h3 class="text-sm sm:text-base font-black text-gray-800 flex items-center gap-2">
+              🚚 Top Livreurs
+            </h3>
+            <p class="text-[11px] text-gray-400 mt-1">Par montant total livré</p>
+          </div>
+          <span class="text-[10px] sm:text-xs bg-orange-50 text-orange-600 px-2.5 sm:px-3 py-1 rounded-full font-bold">
+            {{ periodeTop }}
+          </span>
+        </div>
+
+        <div class="p-3 sm:p-4 space-y-2 sm:space-y-3">
+          <div *ngFor="let l of topLivreurs; let i = index"
+               class="flex items-center gap-3 sm:gap-4 p-3 rounded-xl transition"
+               [ngClass]="i === 0 ? 'bg-orange-50 border border-orange-200' : 'bg-gray-50 border border-[#15803D]/6'">
+            <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg flex items-center justify-center font-black text-xs sm:text-sm shrink-0"
+                 [ngClass]="
+                   i === 0 ? 'bg-orange-500 text-white' :
+                   'bg-orange-100 text-orange-600'
+                 ">
+              {{ i + 1 }}
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-sm font-bold text-gray-800 truncate">{{ l.nom }}</p>
+              <p class="text-xs text-orange-600 font-bold">{{ f(l.total_livraisons) }}</p>
+              <p class="text-[11px] text-gray-400 truncate">📞 {{ l.telephone }}</p>
+            </div>
+            <div class="text-right shrink-0">
+              <p class="text-base sm:text-lg font-black text-gray-800">{{ l.nombre_livraisons }}</p>
+              <p class="text-[11px] text-gray-400">livr.</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ═════════════════ SECTION 8 — STOCK FAIBLE ═════════════════ -->
+  <section *ngIf="!loadingSecondary">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-4">
+
+      <!-- CARTE 1 — TABLEAU COMPACT -->
+      <div class="xl:col-span-2 bg-[#f7faf7] rounded-2xl border border-[#15803D]/6 overflow-hidden"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="px-4 sm:px-5 py-3 sm:py-4 border-b border-[#15803D]/5 flex items-center justify-between flex-wrap gap-3">
+          <div>
+            <h3 class="text-sm font-black text-gray-800">⚠️ Alertes Stock</h3>
+            <p class="text-xs text-gray-500 mt-0.5">
+              <span class="font-black text-red-500">{{ stockFaible.length }}</span>
+              produit(s) sous le seuil
+            </p>
+          </div>
+          <div class="flex items-center gap-3 text-[10px] sm:text-[11px] font-bold">
+            <span class="flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span>Rupture
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-orange-500"></span>Critique
+            </span>
+            <span class="flex items-center gap-1">
+              <span class="w-2 h-2 rounded-full bg-yellow-400"></span>Faible
+            </span>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="bg-[#15803D]/4 text-gray-400 font-black uppercase tracking-widest">
+                <th class="text-left px-4 sm:px-5 py-2">Produit</th>
+                <th class="text-right px-4 sm:px-5 py-2">Stock</th>
+                <th class="text-center px-4 sm:px-5 py-2">Statut</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-[#15803D]/5">
+              <tr *ngFor="let p of stockPagine; trackBy: trackById" class="hover:bg-[#15803D]/3 transition">
+                <td class="px-4 sm:px-5 py-3 font-bold text-gray-700 truncate max-w-[140px]">
+                  {{ p.nom }}
+                </td>
+                <td class="px-4 sm:px-5 py-3 text-right">
+                  <span class="text-lg font-black"
+                        [ngClass]="p.stock <= 0 ? 'text-red-500' : 'text-orange-500'">
+                    {{ p.stock }}
+                  </span>
+                </td>
+                <td class="px-4 sm:px-5 py-3 text-center">
+                  <span class="px-2 py-1 rounded-full text-[10px] font-black"
+                        [ngClass]="stockBadge(p).cls">
+                    {{ stockBadge(p).label }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- CARTE 2 — GRAPHIQUE STOCK -->
+      <div class="bg-[#f7faf7] rounded-2xl border border-[#15803D]/6 p-4 sm:p-5 flex flex-col"
+           style="box-shadow: 0 1px 3px rgba(21,128,61,0.04);">
+        <div class="mb-4">
+          <h3 class="text-sm font-black text-gray-800">📉 Gravité des stocks</h3>
+          <p class="text-xs text-gray-400 mt-1">
+            Visualisation des produits les plus proches de la rupture
+          </p>
+        </div>
+        <div class="flex-1" style="min-height:220px;">
+          <canvas #stockChart></canvas>
+        </div>
+        <p class="text-[11px] text-gray-400 mt-3 text-center">
+          Plus la barre est courte, plus le risque de rupture est élevé
         </p>
       </div>
 
-      <!-- Canvas graphique -->
-      <div class="flex-1" style="min-height:220px;">
-        <canvas #stockChart></canvas>
-      </div>
-
-      <p class="text-[11px] text-gray-400 mt-3 text-center">
-        Plus la barre est courte, plus le risque de rupture est élevé
-      </p>
     </div>
-
-  </div>
-</section>
+  </section>
 
 </div>

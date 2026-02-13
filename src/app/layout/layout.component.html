@@ -1,19 +1,46 @@
-<div class="flex overflow-hidden" style="height: 100vh; background: #f1f5f9;">
+<div class="flex overflow-hidden" style="height: 100vh; background: #ffffff;">
+
+  <!-- ── BACKDROP MOBILE (quand sidebar ouvert sur mobile) ── -->
+  @if (sidebarOpen) {
+    <div class="sidebar-backdrop fixed inset-0 z-40 transition-opacity duration-300"
+         style="background: rgba(0,0,0,0.40); backdrop-filter: blur(2px);"
+         (click)="toggleSidebar()">
+    </div>
+  }
 
   <!-- ── SIDEBAR ──────────────────────────────────────────── -->
   <app-sidebar [isOpen]="sidebarOpen" />
 
   <!-- ── MAIN ─────────────────────────────────────────────── -->
-  <div class="flex flex-col flex-1 overflow-hidden">
+  <div class="flex flex-col flex-1 overflow-hidden min-w-0">
 
     <!-- TOPBAR -->
     <app-topbar (toggleSidebar)="toggleSidebar()" />
 
     <!-- CONTENU -->
     <main class="flex-1 overflow-y-auto"
-          style="background: #f1f5f9; padding: 24px;">
+          style="background: #ffffff; padding: 24px;">
       <router-outlet />
     </main>
 
   </div>
 </div>
+
+<style>
+  /* ── Backdrop visible uniquement sur mobile/tablette ── */
+  .sidebar-backdrop {
+    display: none;
+  }
+  @media (max-width: 768px) {
+    .sidebar-backdrop {
+      display: block;
+    }
+  }
+
+  /* ── Padding adaptatif pour le contenu ── */
+  @media (max-width: 640px) {
+    main {
+      padding: 16px !important;
+    }
+  }
+</style>

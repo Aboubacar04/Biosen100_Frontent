@@ -142,10 +142,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.destroy$.next();
     this.destroy$.complete();
     this.stockChart?.destroy();
-
   }
 
-  // ─── Vague 1 ─────────────────────────────────────────────
+  // ─── Vague 1 — ⚡ setTimeout réduit de 80ms → 0ms (requestAnimationFrame) ─
   loadPriority(): void {
     this.loadingPriority  = true;
     this.loadingSecondary = true;
@@ -162,14 +161,15 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.commandesSemaine = d.commandesSemaine;
         this.loadingPriority  = false;
         this.cdr.markForCheck();
-        setTimeout(() => { this.buildEvolutionChart(); this.buildSemaineChart(); }, 80);
+        // ⚡ requestAnimationFrame au lieu de setTimeout(80) — charts rendus dès le prochain frame
+        requestAnimationFrame(() => { this.buildEvolutionChart(); this.buildSemaineChart(); });
         this.loadSecondary();
       },
       error: () => { this.loadingPriority = false; this.cdr.markForCheck(); }
     });
   }
 
-  // ─── Vague 2 ─────────────────────────────────────────────
+  // ─── Vague 2 — ⚡ idem ────────────────────────────────────
   loadSecondary(): void {
     forkJoin({
       topProduits: this.dashboardService.getTopProduits(this.periodeTop, this.limiteTop, this.boutiqueId),
@@ -185,8 +185,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.stockPage        = 1;
         this.loadingSecondary = false;
         this.cdr.markForCheck();
-        setTimeout(() => this.buildStockChart(), 80);
-
+        // ⚡ requestAnimationFrame au lieu de setTimeout(80)
+        requestAnimationFrame(() => this.buildStockChart());
       },
       error: () => { this.loadingSecondary = false; this.cdr.markForCheck(); }
     });
@@ -212,8 +212,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // GRAPHIQUE 1 — ÉVOLUTION 7 JOURS (HERO, PLEINE LARGEUR)
-  // Courbe épaisse + barres commandes + double axe dynamique
+  // GRAPHIQUE 1 — ÉVOLUTION 7 JOURS
+  // ⚡ Animation réduite : 1000ms → 500ms
   // ═══════════════════════════════════════════════════════════
   buildEvolutionChart(): void {
     if (!this.evolutionCanvasRef?.nativeElement) return;
@@ -225,7 +225,6 @@ export class DashboardComponent implements OnInit, OnDestroy {
     const ventes    = this.evolutionVentes.map(e => Number(e.ventes));
     const commandes = this.evolutionVentes.map(e => Number(e.nombre_commandes));
 
-    // max dynamiques — Chart.js adapte automatiquement les échelles
     const maxIdx = ventes.indexOf(Math.max(...ventes));
 
     this.evolutionChart = new Chart(this.evolutionCanvasRef.nativeElement, {
@@ -265,13 +264,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
               return g;
             },
             borderColor:               '#4ade80',
-            borderWidth:               4,           // ← ligne très épaisse
+            borderWidth:               4,
             pointBackgroundColor: ventes.map((_, i) =>
-              i === maxIdx ? '#f59e0b' : '#4ade80'  // ← meilleur jour = or
+              i === maxIdx ? '#f59e0b' : '#4ade80'
             ),
             pointBorderColor:          '#0f2419',
             pointBorderWidth:          2,
-            pointRadius:               6,           // ← points gros
+            pointRadius:               6,
             pointHoverRadius:          13,
             pointHoverBackgroundColor: '#fbbf24',
             tension:                   0.1,
@@ -283,7 +282,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
       options: {
         responsive:          true,
         maintainAspectRatio: false,
-        animation: { duration: 1000, easing: 'easeOutCubic' as any },
+        animation: { duration: 500, easing: 'easeOutCubic' as any },  // ⚡ 1000 → 500
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
@@ -337,7 +336,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           y: {
             type:        'linear',
             position:    'left',
-            beginAtZero: true,   // ← 0-based, pas de hardcode max
+            beginAtZero: true,
             grid:        { color: 'rgba(255,255,255,0.06)', drawTicks: false },
             border:      { display: false },
             ticks: {
@@ -355,7 +354,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           y1: {
             type:        'linear',
             position:    'right',
-            beginAtZero: true,   // ← dynamique
+            beginAtZero: true,
             grid:        { drawOnChartArea: false },
             border:      { display: false },
             ticks: {
@@ -372,8 +371,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ═══════════════════════════════════════════════════════════
-  // GRAPHIQUE 2 — COMMANDES SEMAINE (barres + ligne)
-  // 100% dynamique : échelles calculées sur les données réelles
+  // GRAPHIQUE 2 — COMMANDES SEMAINE
+  // ⚡ Animation réduite : 900ms → 450ms
   // ═══════════════════════════════════════════════════════════
   buildSemaineChart(): void {
     if (!this.semaineCanvasRef?.nativeElement) return;
@@ -388,49 +387,47 @@ export class DashboardComponent implements OnInit, OnDestroy {
       data: {
         labels,
         datasets: [
-         // Barres commandes
-{
-  type:  'bar' as any,
-  label: 'Commandes',
-  data:  commandes,
-  backgroundColor: (ctx: ScriptableContext<'bar'>) => {
-    const max = Math.max(...commandes, 1);
-    const ratio = commandes[ctx.dataIndex] / max;
-    const alpha = 0.3 + ratio * 0.7;
-    return `rgba(21,128,61,${alpha.toFixed(2)})`;
-  },
-  hoverBackgroundColor: '#166534',
-  borderRadius: 0,        // ❌ plus d’arrondi
-  borderSkipped: false,
-  yAxisID: 'y1',
-  order: 2,
-},
-
-// Ligne ventes
-{
-  type:  'line' as any,
-  label: 'Ventes (FCFA)',
-  data:  ventes,
-  fill:  false,
-  borderColor: '#f59e0b',
-  borderWidth: 3.5,
-  borderDash: [8, 4],
-  pointBackgroundColor: ventes.map(v => v > 0 ? '#f59e0b' : 'transparent'),
-  pointBorderColor: '#ffffff',
-  pointBorderWidth: 2,
-  pointRadius: ventes.map(v => v > 0 ? 4 : 0),  // 🔽 plus petits
-  pointHoverRadius: 6,                          // 🔽 hover réduit
-  tension: 0.3,
-  yAxisID: 'y',
-  order: 1,
-}
-
+          // Barres commandes
+          {
+            type:  'bar' as any,
+            label: 'Commandes',
+            data:  commandes,
+            backgroundColor: (ctx: ScriptableContext<'bar'>) => {
+              const max = Math.max(...commandes, 1);
+              const ratio = commandes[ctx.dataIndex] / max;
+              const alpha = 0.3 + ratio * 0.7;
+              return `rgba(21,128,61,${alpha.toFixed(2)})`;
+            },
+            hoverBackgroundColor: '#166534',
+            borderRadius: 0,
+            borderSkipped: false,
+            yAxisID: 'y1',
+            order: 2,
+          },
+          // Ligne ventes
+          {
+            type:  'line' as any,
+            label: 'Ventes (FCFA)',
+            data:  ventes,
+            fill:  false,
+            borderColor: '#f59e0b',
+            borderWidth: 3.5,
+            borderDash: [8, 4],
+            pointBackgroundColor: ventes.map(v => v > 0 ? '#f59e0b' : 'transparent'),
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: ventes.map(v => v > 0 ? 4 : 0),
+            pointHoverRadius: 6,
+            tension: 0.3,
+            yAxisID: 'y',
+            order: 1,
+          }
         ],
       },
       options: {
         responsive:          true,
         maintainAspectRatio: false,
-        animation: { duration: 900, easing: 'easeOutQuart' as any },
+        animation: { duration: 450, easing: 'easeOutQuart' as any },  // ⚡ 900 → 450
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: {
@@ -476,7 +473,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           y: {
             type:        'linear',
             position:    'left',
-            beginAtZero: true,   // ← dynamique
+            beginAtZero: true,
             grid:        { color: '#f3f4f6', drawTicks: false },
             border:      { display: false },
             ticks: {
@@ -493,7 +490,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
           y1: {
             type:        'linear',
             position:    'right',
-            beginAtZero: true,   // ← dynamique — s'adapte si 90 commandes/jour
+            beginAtZero: true,
             grid:        { drawOnChartArea: false },
             border:      { display: false },
             ticks: {
@@ -546,73 +543,64 @@ export class DashboardComponent implements OnInit, OnDestroy {
     return ['🥇','🥈','🥉'][i] ?? `#${i+1}`;
   }
 
+  // ═══════════════════════════════════════════════════════════
+  // GRAPHIQUE 3 — STOCK FAIBLE
+  // ⚡ Animation réduite + requestAnimationFrame
+  // ═══════════════════════════════════════════════════════════
+  buildStockChart(): void {
+    if (!this.stockChartRef?.nativeElement) return;
+    this.stockChart?.destroy();
 
+    const produits = this.stockFaible.slice(0, 6);
 
+    const labels = produits.map(p =>
+      p.nom.length > 14 ? p.nom.slice(0, 14) + '…' : p.nom
+    );
 
+    const stocks = produits.map(p => p.stock);
 
-
-
-
-// ═══════════════════════════════════════════════════════════
-// GRAPHIQUE 3 — STOCK FAIBLE (barres horizontales)
-// Montre les produits les plus proches de la rupture
-// ═══════════════════════════════════════════════════════════
-buildStockChart(): void {
-  if (!this.stockChartRef?.nativeElement) return;
-  this.stockChart?.destroy();
-
-  const produits = this.stockFaible.slice(0, 6); // max 6 produits pour rester lisible
-
-  const labels = produits.map(p =>
-    p.nom.length > 14 ? p.nom.slice(0, 14) + '…' : p.nom
-  );
-
-  const stocks = produits.map(p => p.stock);
-
-  this.stockChart = new Chart(this.stockChartRef.nativeElement, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [
-        {
-          label: 'Stock restant',
-          data: stocks,
-          borderRadius: 6,
-          backgroundColor: stocks.map(v =>
-            v <= 0 ? '#ef4444' :      // rouge = rupture
-            v <= 5 ? '#f97316' :      // orange = critique
-            '#eab308'                 // jaune = faible
-          ),
-        }
-      ]
-    },
-    options: {
-      indexAxis: 'y', // ← barres horizontales
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: {
-          callbacks: {
-            label: (ctx) => ` Stock: ${ctx.raw}`
+    this.stockChart = new Chart(this.stockChartRef.nativeElement, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Stock restant',
+            data: stocks,
+            borderRadius: 6,
+            backgroundColor: stocks.map(v =>
+              v <= 0 ? '#ef4444' :
+              v <= 5 ? '#f97316' :
+              '#eab308'
+            ),
+          }
+        ]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        animation: { duration: 400 },  // ⚡ rapide
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => ` Stock: ${ctx.raw}`
+            }
+          }
+        },
+        scales: {
+          x: {
+            beginAtZero: true,
+            ticks: { color: '#9ca3af', font: { size: 11 } },
+            grid: { color: 'rgba(21,128,61,0.06)' }
+          },
+          y: {
+            ticks: { color: '#374151', font: { size: 11, weight: 'bold' as any } },
+            grid: { display: false }
           }
         }
-      },
-      scales: {
-        x: {
-          beginAtZero: true,
-          ticks: { color: '#9ca3af', font: { size: 11 } },
-          grid: { color: '#f3f4f6' }
-        },
-        y: {
-          ticks: { color: '#374151', font: { size: 11, weight: 'bold' as any } },
-          grid: { display: false }
-        }
       }
-    }
-  });
-}
-
-
-
+    });
+  }
 }

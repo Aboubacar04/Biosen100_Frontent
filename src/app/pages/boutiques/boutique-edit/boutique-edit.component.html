@@ -1,0 +1,147 @@
+<div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-3xl mx-auto">
+
+    <!-- HEADER -->
+    <div class="flex items-center gap-4 mb-6">
+      <a
+        routerLink="/boutiques"
+        class="p-2 hover:bg-gray-100 rounded-lg transition-all">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div>
+        <h1 class="text-3xl font-bold text-gray-900">Modifier la boutique</h1>
+        @if (boutique) {
+          <p class="text-gray-500 mt-1">{{ boutique.nom }}</p>
+        }
+      </div>
+    </div>
+
+    <!-- ERREUR -->
+    @if (errorMessage) {
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-sm text-red-800">{{ errorMessage }}</p>
+      </div>
+    }
+
+    <!-- LOADING -->
+    @if (loading && !boutique) {
+      <div class="flex items-center justify-center py-12">
+        <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </div>
+    } @else {
+      <!-- FORMULAIRE -->
+      <form [formGroup]="boutiqueForm" (ngSubmit)="onSubmit()" class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+
+        <!-- NOM -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Nom de la boutique <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="nom"
+            placeholder="Ex: Boutique Centre-Ville"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            [class.border-red-500]="boutiqueForm.get('nom')?.invalid && boutiqueForm.get('nom')?.touched"
+          />
+          @if (boutiqueForm.get('nom')?.invalid && boutiqueForm.get('nom')?.touched) {
+            <p class="mt-1 text-sm text-red-600">Le nom est requis</p>
+          }
+        </div>
+
+        <!-- ADRESSE -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Adresse <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="text"
+            formControlName="adresse"
+            placeholder="Ex: Avenue Lamine Gueye, Dakar"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            [class.border-red-500]="boutiqueForm.get('adresse')?.invalid && boutiqueForm.get('adresse')?.touched"
+          />
+          @if (boutiqueForm.get('adresse')?.invalid && boutiqueForm.get('adresse')?.touched) {
+            <p class="mt-1 text-sm text-red-600">L'adresse est requise</p>
+          }
+        </div>
+
+        <!-- TÉLÉPHONE -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Téléphone <span class="text-red-500">*</span>
+          </label>
+          <input
+            type="tel"
+            formControlName="telephone"
+            placeholder="Ex: 221338234567"
+            class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+            [class.border-red-500]="boutiqueForm.get('telephone')?.invalid && boutiqueForm.get('telephone')?.touched"
+          />
+          @if (boutiqueForm.get('telephone')?.invalid && boutiqueForm.get('telephone')?.touched) {
+            <p class="mt-1 text-sm text-red-600">Le téléphone est requis</p>
+          }
+        </div>
+
+        <!-- LOGO -->
+        <div class="mb-6">
+          <label class="block text-sm font-semibold text-gray-700 mb-2">
+            Logo
+          </label>
+
+          <!-- Preview -->
+          @if (logoPreview) {
+            <div class="mb-4">
+              <img [src]="logoPreview" alt="Logo" class="w-32 h-32 object-contain border border-gray-300 rounded-lg">
+            </div>
+          }
+
+          <!-- Input file -->
+          <input
+            type="file"
+            (change)="onFileSelected($event)"
+            accept="image/jpeg,image/png,image/jpg,image/gif"
+            class="block w-full text-sm text-gray-500
+                   file:mr-4 file:py-2 file:px-4
+                   file:rounded-lg file:border-0
+                   file:text-sm file:font-semibold
+                   file:bg-green-50 file:text-green-700
+                   hover:file:bg-green-100"
+          />
+          <p class="mt-1 text-xs text-gray-500">JPG, PNG, GIF (max 2MB). Laissez vide pour garder le logo actuel.</p>
+        </div>
+
+        <!-- BOUTONS -->
+        <div class="flex items-center justify-end gap-3 pt-4 border-t border-gray-200">
+          <a
+            routerLink="/boutiques"
+            class="px-6 py-2.5 text-gray-700 hover:bg-gray-100 rounded-lg transition-all font-medium">
+            Annuler
+          </a>
+          <button
+            type="submit"
+            [disabled]="loading"
+            class="px-6 py-2.5 bg-green-700 text-white rounded-lg hover:bg-green-800 transition-all font-medium disabled:opacity-50 flex items-center gap-2">
+            @if (loading) {
+              <svg class="w-5 h-5 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+            }
+            Enregistrer les modifications
+          </button>
+        </div>
+
+      </form>
+    }
+
+  </div>
+</div>

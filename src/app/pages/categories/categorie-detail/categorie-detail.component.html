@@ -1,0 +1,232 @@
+<p>categorie-detail works!</p><div class="min-h-screen bg-gray-50 p-6">
+  <div class="max-w-7xl mx-auto">
+
+    <!-- HEADER AVEC BOUTON RETOUR -->
+    <div class="flex items-center gap-4 mb-6">
+      <a
+        routerLink="/categories"
+        class="p-2 hover:bg-gray-100 rounded-lg transition-all">
+        <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+        </svg>
+      </a>
+      <div class="flex-1">
+        <h1 class="text-3xl font-bold text-gray-900">Détails de la catégorie</h1>
+        @if (categorie) {
+          <p class="text-gray-500 mt-1">{{ categorie.nom }}</p>
+        }
+      </div>
+      @if (categorie) {
+        <div class="flex items-center gap-3">
+          <a
+            [routerLink]="['/categories/edit', categorie.id]"
+            class="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-all text-sm font-medium">
+            Modifier
+          </a>
+          <button
+            (click)="openDeleteModal()"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm font-medium">
+            Supprimer
+          </button>
+        </div>
+      }
+    </div>
+
+    <!-- ERREUR -->
+    @if (errorMessage) {
+      <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-start gap-3">
+        <svg class="w-5 h-5 text-red-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+        <p class="text-sm text-red-800">{{ errorMessage }}</p>
+      </div>
+    }
+
+    <!-- LOADING -->
+    @if (loading) {
+      <div class="flex items-center justify-center py-12">
+        <svg class="w-8 h-8 animate-spin text-green-700" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+        </svg>
+      </div>
+    } @else if (categorie) {
+
+      <!-- LAYOUT 2 COLONNES -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+
+        <!-- COLONNE GAUCHE : STICKY -->
+        <div class="lg:col-span-1">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6 lg:sticky lg:top-6">
+
+            <!-- NOM -->
+            <div class="mb-6 pb-6 border-b border-gray-200">
+              <h2 class="text-3xl font-bold text-gray-900 mb-2">{{ categorie.nom }}</h2>
+              <span class="inline-flex items-center gap-2 px-3 py-1.5 bg-purple-100 text-purple-700 rounded-lg text-sm font-semibold">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+                </svg>
+                {{ (categorie.produits?.length || 0) }} produit(s)
+              </span>
+            </div>
+
+            <!-- DATES -->
+            <div class="space-y-3 text-sm">
+              <div class="flex items-center gap-2 text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                </svg>
+                <span class="font-medium">Créée le :</span>
+                <span>{{ categorie.created_at | date:'dd/MM/yyyy à HH:mm' }}</span>
+              </div>
+              <div class="flex items-center gap-2 text-gray-600">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                </svg>
+                <span class="font-medium">Modifiée le :</span>
+                <span>{{ categorie.updated_at | date:'dd/MM/yyyy à HH:mm' }}</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- COLONNE DROITE : DESCRIPTION -->
+        <div class="lg:col-span-2">
+          <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+              </svg>
+              Description
+            </h3>
+            <p class="text-gray-700 leading-relaxed whitespace-pre-wrap">
+              {{ categorie.description || 'Aucune description disponible' }}
+            </p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- LISTE DES PRODUITS -->
+      <div class="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+        <h3 class="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+          </svg>
+          Produits de la catégorie
+          <span class="text-sm font-normal text-gray-500">({{ (categorie.produits?.length || 0) }})</span>
+        </h3>
+
+        @if (!categorie.produits || categorie.produits.length === 0) {
+          <div class="text-center py-12 text-gray-400">
+            <svg class="w-16 h-16 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/>
+            </svg>
+            <p class="text-lg">Aucun produit dans cette catégorie</p>
+          </div>
+        } @else {
+          <!-- GRILLE PRODUITS -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            @for (produit of categorie.produits; track trackByProduitId($index, produit)) {
+              <div class="border border-gray-200 rounded-lg p-4 hover:border-green-500 transition-all">
+                <h4 class="font-semibold text-gray-900 mb-2">{{ produit.nom }}</h4>
+                <p class="text-sm text-gray-600 mb-3 line-clamp-2">
+                  {{ produit.description || 'Pas de description' }}
+                </p>
+
+                <div class="space-y-2">
+                  <!-- PRIX -->
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Prix :</span>
+                    <span class="font-bold text-green-700">{{ produit.prix_vente | number:'1.0-2' }} F</span>
+                  </div>
+
+                  <!-- STOCK -->
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Stock :</span>
+                    <span
+                      class="px-2 py-1 rounded text-xs font-semibold"
+                      [ngClass]="getStockClass(produit)">
+                      {{ produit.stock }}
+                      @if (produit.stock < 0) { (négatif) }
+                      @else if (produit.stock <= produit.seuil_alerte) { (alerte) }
+                    </span>
+                  </div>
+
+                  <!-- STATUT -->
+                  <div class="flex items-center justify-between text-sm">
+                    <span class="text-gray-600">Statut :</span>
+                    <span
+                      class="px-2 py-1 rounded text-xs font-semibold"
+                      [class.bg-green-100]="produit.actif"
+                      [class.text-green-700]="produit.actif"
+                      [class.bg-gray-100]="!produit.actif"
+                      [class.text-gray-700]="!produit.actif">
+                      {{ produit.actif ? 'Actif' : 'Inactif' }}
+                    </span>
+                  </div>
+                </div>
+
+                <!-- LIEN VERS PRODUIT -->
+                <a
+                  [routerLink]="['/produits', produit.id]"
+                  class="mt-4 block w-full px-3 py-2 bg-blue-50 text-blue-700 text-center rounded-lg hover:bg-blue-100 transition-all text-sm font-medium">
+                  Voir le produit →
+                </a>
+              </div>
+            }
+          </div>
+        }
+
+      </div>
+
+    }
+
+  </div>
+</div>
+
+<!-- MODAL SUPPRESSION -->
+@if (showDeleteModal && categorie) {
+  <div class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-6">
+      <h3 class="text-xl font-bold text-gray-900 mb-4">Supprimer la catégorie</h3>
+      <p class="text-sm text-gray-600 mb-2">
+        Êtes-vous sûr de vouloir supprimer cette catégorie ?
+      </p>
+      <p class="text-sm font-semibold text-gray-900 mb-2">
+        {{ categorie.nom }}
+      </p>
+      @if (categorie.produits && categorie.produits.length > 0) {
+        <p class="text-sm text-red-600 font-semibold mb-6">
+          ⚠️ Cette catégorie contient {{ categorie.produits.length }} produit(s). Impossible de supprimer.
+        </p>
+      } @else {
+        <p class="text-sm text-gray-500 mb-6">Cette action est irréversible.</p>
+      }
+
+      <div class="flex items-center justify-end gap-3">
+        <button
+          (click)="showDeleteModal = false"
+          [disabled]="deleteLoading"
+          class="px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg transition-all disabled:opacity-50">
+          Annuler
+        </button>
+        @if (!categorie.produits || categorie.produits.length === 0) {
+          <button
+            (click)="confirmDelete()"
+            [disabled]="deleteLoading"
+            class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all disabled:opacity-50 flex items-center gap-2">
+            @if (deleteLoading) {
+              <svg class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
+              </svg>
+            }
+            Supprimer
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
